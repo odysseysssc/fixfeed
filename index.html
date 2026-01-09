@@ -552,7 +552,7 @@
           <!-- Privacy-first option -->
           <details style="margin-bottom: 24px;">
             <summary style="cursor: pointer; color: var(--dark); font-size: 14px; text-align: center; list-style: none; display: flex; align-items: center; justify-content: center; gap: 8px;">
-              <span>Privacy-first option?</span>
+              <span>Big file? Upload just 4 files instead</span>
               <span style="font-size: 10px; transition: transform 0.2s;">▼</span>
             </summary>
             <div style="background: var(--cream-dark); border-radius: 4px; padding: 20px; margin-top: 16px;">
@@ -1015,6 +1015,8 @@
           status.textContent = 'Reading likes...';
           var content = await individualFiles.like.text();
           likeData = parseTwitterJS(content);
+          console.log('Like data loaded:', likeData.length, 'items');
+          console.log('First like item:', JSON.stringify(likeData[0], null, 2));
         }
 
         if (individualFiles.tweets) {
@@ -1042,22 +1044,42 @@
         var cutoffDate = twoYearsAgo.toISOString().slice(0, 7); // YYYY-MM format
         
         likeData.forEach(function(l) {
-          var url = l.like?.expandedUrl || '';
+          // X changed archive format - expandedUrl no longer has username
+          // Try to extract from fullText if it's a reply (starts with @username)
+          var fullText = l.like?.fullText || l.fullText || '';
+          var url = l.like?.expandedUrl || l.like?.fullUrl || l.expandedUrl || l.fullUrl || '';
+          
+          // Method 1: Try URL (old format or lucky)
           var match = url.match(/twitter\.com\/([^\/]+)\/status/i) || url.match(/x\.com\/([^\/]+)\/status/i);
-          if (match) {
-            var handle = match[1].toLowerCase();
-            if (handle !== 'i') {
-              var date = l.like?.tweetId ? extractDateFromId(l.like.tweetId) : null;
-              // Only count if within last 2 years
-              if (!date || date >= cutoffDate) {
-                likeCounts[handle] = (likeCounts[handle] || 0) + 1;
-                if (date && (!lastLikeDates[handle] || date > lastLikeDates[handle])) {
-                  lastLikeDates[handle] = date;
-                }
+          var handle = null;
+          
+          if (match && match[1] !== 'i' && match[1] !== 'web') {
+            handle = match[1].toLowerCase();
+          }
+          
+          // Method 2: If fullText starts with @username, it's a reply - extract the username
+          if (!handle && fullText.startsWith('@')) {
+            var mentionMatch = fullText.match(/^@(\w+)/);
+            if (mentionMatch) {
+              handle = mentionMatch[1].toLowerCase();
+            }
+          }
+          
+          if (handle && handle !== 'i' && handle !== 'web') {
+            var tweetId = l.like?.tweetId || l.tweetId || '';
+            var date = tweetId ? extractDateFromId(tweetId) : null;
+            // Only count if within last 2 years
+            if (!date || date >= cutoffDate) {
+              likeCounts[handle] = (likeCounts[handle] || 0) + 1;
+              if (date && (!lastLikeDates[handle] || date > lastLikeDates[handle])) {
+                lastLikeDates[handle] = date;
               }
             }
           }
         });
+        
+        console.log('Like counts:', Object.keys(likeCounts).length, 'accounts');
+        console.log('Sample likes:', Object.entries(likeCounts).slice(0, 5));
 
         // Count replies per user and collect top tweets (last 2 years only)
         var replyCounts = {};
@@ -1484,10 +1506,27 @@
           var likeContent = await likeFile.async('string');
           var likeData = parseTwitterJS(likeContent);
           likeData.forEach(function(l) {
+            // X changed archive format - expandedUrl no longer has username
+            var fullText = l.like?.fullText || l.fullText || '';
             var url = l.like?.expandedUrl || '';
-            var match = url.match(/x\.com\/([^\/]+)\//i) || url.match(/twitter\.com\/([^\/]+)\//i);
-            if (match) {
-              var handle = match[1].toLowerCase();
+            
+            // Method 1: Try URL (old format)
+            var match = url.match(/x\.com\/([^\/]+)\/status/i) || url.match(/twitter\.com\/([^\/]+)\/status/i);
+            var handle = null;
+            
+            if (match && match[1] !== 'i' && match[1] !== 'web') {
+              handle = match[1].toLowerCase();
+            }
+            
+            // Method 2: If fullText starts with @username, extract it
+            if (!handle && fullText.startsWith('@')) {
+              var mentionMatch = fullText.match(/^@(\w+)/);
+              if (mentionMatch) {
+                handle = mentionMatch[1].toLowerCase();
+              }
+            }
+            
+            if (handle && handle !== 'i' && handle !== 'web') {
               var date = l.like?.tweetId ? extractDateFromId(l.like.tweetId) : null;
               // Only count if within last 2 years
               if (!date || date >= cutoffDate) {
