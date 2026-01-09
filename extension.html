@@ -1,399 +1,2181 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FixYourFeed Extension — Free Download</title>
+  <title>FixYourFeed — Take Back Your X Feed</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --black: #0a0a0a;
-      --white: #f5f5f4;
-      --gray: #71717a;
-      --gray-dark: #27272a;
-      --accent: #22d3ee;
-      --accent-dim: rgba(34, 211, 238, 0.1);
-      --danger: #f43f5e;
-      --success: #22c55e;
+      --cream: #f5f0e6;
+      --cream-dark: #e8e2d6;
+      --dark: #1a1a1a;
+      --gray: #6b6b6b;
+      --gray-light: #a3a3a3;
+      --green: #2d5a3d;
+      --green-light: #4a7c59;
+      --green-dim: rgba(45, 90, 61, 0.1);
+      --danger: #dc2626;
+      --success: #16a34a;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      font-family: 'Syne', sans-serif;
-      background: var(--black);
-      color: var(--white);
+      font-family: 'Space Mono', monospace;
+      background: var(--cream);
+      color: var(--dark);
       min-height: 100vh;
-      line-height: 1.6;
     }
 
-    body::before {
-      content: '';
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-      opacity: 0.03;
-      pointer-events: none;
-      z-index: 1000;
-    }
-
-    .container { max-width: 700px; margin: 0 auto; padding: 60px 24px; }
+    .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
 
     header {
       padding: 24px 0;
-      border-bottom: 1px solid var(--gray-dark);
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      background: var(--black);
-      z-index: 100;
-    }
-
-    .header-inner {
-      max-width: 700px;
-      margin: 0 auto;
-      padding: 0 24px;
+      border-bottom: 1px solid var(--cream-dark);
     }
 
     .logo {
-      font-weight: 800; font-size: 18px; letter-spacing: -0.5px;
-      display: flex; align-items: center; gap: 8px;
-      text-decoration: none;
-      color: var(--white);
+      font-weight: 700; font-size: 16px;
+      display: flex; align-items: center; gap: 10px; cursor: pointer;
     }
 
-    .logo-icon {
-      width: 24px; height: 24px; background: var(--accent); border-radius: 4px;
-      display: flex; align-items: center; justify-content: center; font-size: 14px;
+    .logo-dot {
+      width: 12px; height: 12px; background: var(--green); border-radius: 2px;
     }
+
+    .page { display: none; animation: fadeIn 0.4s ease; }
+    .page.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Forms & Buttons */
+    input[type="text"], input[type="email"] {
+      width: 100%; padding: 14px 16px;
+      background: var(--cream); border: 2px solid var(--cream-dark); border-radius: 4px;
+      color: var(--dark); font-family: 'Space Mono', monospace; font-size: 14px;
+      outline: none; transition: border-color 0.2s;
+    }
+    input:focus { border-color: var(--green); }
+    input::placeholder { color: var(--gray-light); }
 
     .btn {
-      padding: 16px 32px; background: var(--accent); color: var(--black);
-      font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700;
-      border: none; border-radius: 8px; cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
-      text-decoration: none;
-      display: inline-block;
+      padding: 14px 28px; background: var(--green); color: var(--cream);
+      font-family: 'Space Mono', monospace; font-size: 14px; font-weight: 700;
+      border: none; border-radius: 4px; cursor: pointer;
+      transition: background 0.2s;
     }
-    .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px var(--accent-dim); }
+    .btn:hover { background: var(--dark); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-secondary { background: transparent; color: var(--dark); border: 2px solid var(--cream-dark); }
+    .btn-secondary:hover { border-color: var(--dark); background: transparent; }
 
-    .btn-secondary {
-      background: var(--gray-dark);
-      color: var(--white);
+    /* Page 1: Hero */
+    .hero { padding: 80px 0 60px; text-align: center; }
+    .hero h1 {
+      font-size: clamp(36px, 8vw, 56px); font-weight: 700;
+      line-height: 1.1; letter-spacing: -2px; margin-bottom: 20px;
     }
+    .hero h1 span { color: var(--green); }
+    .hero p { font-size: 16px; color: var(--gray); max-width: 460px; margin: 0 auto 40px; line-height: 1.6; }
 
-    h1 {
-      font-size: 42px;
-      font-weight: 800;
-      letter-spacing: -1px;
-      margin-bottom: 16px;
-      margin-top: 80px;
+    .handle-form { display: flex; gap: 12px; max-width: 400px; margin: 0 auto; }
+    .input-wrapper { flex: 1; position: relative; }
+    .input-wrapper::before {
+      content: '@'; position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+      color: var(--gray); font-family: 'Space Mono', monospace; font-size: 16px;
     }
+    .input-wrapper input { padding-left: 40px; }
 
-    h1 span {
-      background: linear-gradient(135deg, var(--accent), #a78bfa);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+    /* Loading */
+    .loading-page { padding: 120px 0; text-align: center; }
+    .spinner {
+      width: 48px; height: 48px;
+      border: 3px solid var(--cream-dark); border-top-color: var(--green);
+      border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 24px;
     }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-page p { color: var(--gray); font-family: 'Space Mono', monospace; }
 
-    .subtitle {
-      font-size: 18px;
-      color: var(--gray);
-      margin-bottom: 32px;
+    /* Page 2: Analysis */
+    .analysis { padding: 60px 0; }
+    .profile-card {
+      display: flex; align-items: center; gap: 20px;
+      padding: 24px; background: var(--cream-dark); border-radius: 12px; margin-bottom: 32px;
     }
-
-    .features {
-      display: flex;
-      gap: 24px;
-      margin-bottom: 40px;
+    .profile-avatar {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+      overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; font-weight: 700; color: var(--cream);
+      position: relative;
     }
-
-    .feature {
-      flex: 1;
-      background: var(--gray-dark);
-      border-radius: 12px;
-      padding: 20px;
+    .profile-avatar img { 
+      width: 100%; height: 100%; object-fit: cover; 
+      position: absolute; top: 0; left: 0;
+      transition: opacity 0.2s;
     }
-
-    .feature-icon {
-      font-size: 24px;
-      margin-bottom: 8px;
-    }
-
-    .feature-title {
+    .profile-avatar .initials { 
+      font-size: 24px; 
       font-weight: 700;
-      margin-bottom: 4px;
     }
+    .profile-info h3 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+    .profile-info span { color: var(--gray); font-family: 'Space Mono', monospace; font-size: 14px; }
 
-    .feature-desc {
-      font-size: 13px;
-      color: var(--gray);
+    .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 32px; }
+    .stat-card { padding: 24px; background: var(--cream-dark); border-radius: 12px; }
+    .stat-number {
+      font-size: 36px; font-weight: 800; letter-spacing: -2px;
+      margin-bottom: 4px; font-family: 'Space Mono', monospace;
     }
+    .stat-label { color: var(--gray); font-size: 14px; }
 
-    .download-box {
-      background: var(--gray-dark);
-      border-radius: 16px;
+    .insight {
       padding: 32px;
-      text-align: center;
-      margin-bottom: 48px;
+      background: linear-gradient(135deg, rgba(34, 211, 238, 0.1) 0%, rgba(244, 63, 94, 0.1) 100%);
+      border-radius: 12px; border: 1px solid var(--cream-dark);
+      margin-bottom: 32px; text-align: center;
+    }
+    .insight-big { font-size: clamp(32px, 8vw, 48px); font-weight: 800; letter-spacing: -2px; margin-bottom: 8px; }
+    .insight-text { color: var(--gray); font-size: 16px; line-height: 1.6; }
+
+    .stat-card.highlight {
+      border: 1px solid var(--danger); background: rgba(244, 63, 94, 0.05); text-align: center;
+    }
+    .stat-card.highlight .stat-number { color: var(--danger); }
+
+    .cta-section {
+      text-align: center; padding: 40px; background: var(--cream-dark); border-radius: 12px;
+    }
+    .cta-section h3 { font-size: 24px; font-weight: 700; margin-bottom: 12px; }
+    .cta-section p { color: var(--gray); margin-bottom: 24px; }
+    .email-form { display: flex; gap: 12px; max-width: 400px; margin: 0 auto; }
+    .email-form input { flex: 1; }
+
+    /* Page 3: Instructions */
+    .instructions-page { padding: 80px 0; text-align: center; }
+    .success-icon {
+      width: 80px; height: 80px; background: var(--success); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 32px; font-size: 40px;
+    }
+    .instructions-page h2 { font-size: 32px; margin-bottom: 16px; }
+    .instructions-page > .container > p { color: var(--gray); margin-bottom: 40px; }
+
+    .steps-list { text-align: left; max-width: 500px; margin: 0 auto 40px; }
+    .step-item {
+      display: flex; gap: 16px; margin-bottom: 24px;
+      padding: 20px; background: var(--cream-dark); border-radius: 12px;
+    }
+    .step-number {
+      width: 32px; height: 32px; background: var(--green); color: var(--dark);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-weight: 700; flex-shrink: 0;
+    }
+    .step-content h4 { margin-bottom: 8px; }
+    .step-content p { color: var(--gray); font-size: 14px; line-height: 1.6; }
+    .step-content a { color: var(--green); }
+
+    /* Page 4: Upload */
+    .upload-page { padding: 60px 0; }
+    .upload-page h2 { font-size: 32px; margin-bottom: 12px; }
+    .upload-page > .container > p { color: var(--gray); margin-bottom: 40px; }
+
+    .demo-notice {
+      background: rgba(34, 211, 238, 0.1); border: 1px solid var(--green);
+      border-radius: 8px; padding: 12px 16px; margin-bottom: 24px;
+      font-size: 13px; display: flex; align-items: center; gap: 10px;
     }
 
-    .download-box h2 {
-      font-size: 20px;
-      margin-bottom: 8px;
+    .upload-zone {
+      border: 2px dashed var(--cream-dark); border-radius: 16px;
+      padding: 60px; text-align: center; cursor: pointer;
+      transition: border-color 0.3s, background 0.3s;
+    }
+    .upload-zone:hover { border-color: var(--green); background: var(--green-dim); }
+    .upload-zone-small { min-height: auto; padding: 20px; }
+    .upload-zone-small .upload-icon { display: none; }
+    .upload-option-tab.active { background: var(--green) !important; color: var(--cream) !important; }
+    .upload-option-tab:hover:not(.active) { border-color: var(--gray); color: var(--dark); }
+    .upload-icon {
+      width: 64px; height: 64px; background: var(--cream-dark); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 24px; font-size: 28px;
+    }
+    .upload-zone h3 { font-size: 20px; margin-bottom: 8px; }
+    .upload-zone p { color: var(--gray); font-size: 14px; }
+
+    .processing-info { margin-top: 32px; display: none; }
+    .processing-info.active { display: block; }
+    .progress-bar {
+      height: 4px; background: var(--cream-dark); border-radius: 2px;
+      overflow: hidden; margin-bottom: 16px;
+    }
+    .progress-fill { height: 100%; background: var(--green); width: 0%; transition: width 0.3s; }
+    .processing-status { font-family: 'Space Mono', monospace; font-size: 13px; color: var(--gray); }
+
+    /* Page 5: Results */
+    .results-page { padding: 60px 0; }
+    .results-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 32px; flex-wrap: wrap; gap: 16px;
+    }
+    .results-header h2 { font-size: 28px; font-weight: 800; }
+    .results-summary { display: flex; gap: 24px; font-family: 'Space Mono', monospace; font-size: 14px; }
+    .summary-item { display: flex; align-items: center; gap: 8px; }
+    .summary-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .summary-dot.inactive { background: var(--danger); }
+    .summary-dot.active { background: var(--success); }
+
+    .filter-tabs { display: flex; gap: 8px; margin-bottom: 24px; }
+    .filter-tab {
+      padding: 10px 20px; background: transparent; border: 2px solid var(--cream-dark);
+      border-radius: 4px; color: var(--gray); font-family: 'Space Mono', monospace;
+      font-size: 13px; cursor: pointer; transition: all 0.2s;
+    }
+    .filter-tab:hover { border-color: var(--gray); color: var(--dark); }
+    .filter-tab.active { background: var(--green); color: var(--cream); border-color: var(--green); }
+
+    .search-input {
+      width: 100%; padding: 12px 16px; background: var(--cream);
+      border: 2px solid var(--cream-dark); border-radius: 4px; color: var(--dark);
+      font-family: 'Space Mono', monospace; font-size: 13px;
+      outline: none; margin-bottom: 16px;
+    }
+    .search-input:focus { border-color: var(--green); }
+
+    .select-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 16px; background: var(--cream-dark); border-radius: 8px; margin-bottom: 16px;
+    }
+    .select-bar label { display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 14px; }
+
+    .account-list {
+      border: 1px solid var(--cream-dark); border-radius: 12px;
+      overflow: hidden; max-height: 500px; overflow-y: auto;
     }
 
-    .download-box p {
-      color: var(--gray);
-      font-size: 14px;
-      margin-bottom: 20px;
-    }
-
-    .steps {
-      text-align: left;
-      margin-bottom: 48px;
-    }
-
-    .steps h2 {
-      font-size: 20px;
-      margin-bottom: 24px;
-    }
-
-    .step {
-      display: flex;
-      gap: 16px;
-      margin-bottom: 24px;
-    }
-
-    .step-num {
-      width: 32px;
-      height: 32px;
-      background: var(--accent);
-      color: var(--black);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      flex-shrink: 0;
-    }
-
-    .step-content h3 {
-      font-size: 16px;
-      margin-bottom: 4px;
-    }
-
-    .step-content p {
-      font-size: 14px;
-      color: var(--gray);
-    }
-
-    .step-content code {
-      background: var(--black);
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 13px;
-      color: var(--accent);
-    }
-
-    .screenshot {
-      background: var(--black);
-      border: 1px solid var(--gray-dark);
-      border-radius: 8px;
-      padding: 12px;
-      margin-top: 12px;
-    }
-
-    .screenshot img {
-      width: 100%;
-      border-radius: 4px;
-    }
-
-    .screenshot-placeholder {
-      height: 150px;
-      background: var(--gray-dark);
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--gray);
-      font-size: 13px;
-    }
-
-    .back-link {
-      text-align: center;
-      margin-top: 48px;
-      padding-top: 32px;
-      border-top: 1px solid var(--gray-dark);
-    }
-
-    .back-link a {
-      color: var(--gray);
-      text-decoration: none;
-      font-size: 14px;
-    }
-
-    .back-link a:hover {
-      color: var(--accent);
-    }
-
-    .tip-jar {
-      text-align: center;
-      margin-top: 32px;
-      padding: 24px;
-      background: var(--gray-dark);
+    /* Sortable table styles */
+    .sortable-table {
+      border: 1px solid var(--cream-dark);
       border-radius: 12px;
+      overflow: hidden;
     }
-
-    .tip-jar p {
-      color: var(--gray);
-      font-size: 14px;
-      margin-bottom: 12px;
-    }
-
-    .tip-address {
+    .table-header {
       display: flex;
-      align-items: center;
-      justify-content: center;
+      padding: 12px 16px;
+      background: var(--cream-dark);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--gray);
       gap: 8px;
     }
-
-    .tip-address code {
-      background: var(--black);
-      padding: 10px 14px;
-      border-radius: 6px;
-      font-family: 'JetBrains Mono', monospace;
+    .th { display: flex; align-items: center; justify-content: center; }
+    .th-check { width: 32px; }
+    .th-account { flex: 1; min-width: 180px; justify-content: flex-start; }
+    .th-mutual { width: 65px; }
+    .th-date { width: 100px; }
+    .th-num { width: 55px; }
+    .th-action { width: 80px; }
+    .th-action-wide { width: 95px; }
+    .th.sortable { cursor: pointer; transition: color 0.2s; user-select: none; }
+    .th.sortable:hover { color: var(--cream); }
+    .th.active-sort { color: var(--green); }
+    .table-body { max-height: 400px; overflow-y: auto; }
+    .table-row {
+      display: flex;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--cream-dark);
+      align-items: center;
       font-size: 13px;
-      color: var(--accent);
+      gap: 12px;
+      transition: background 0.15s;
     }
-
-    .tip-address button {
-      padding: 10px 14px;
-      background: var(--gray-dark);
-      border: 1px solid var(--gray);
-      color: var(--white);
-      border-radius: 6px;
-      cursor: pointer;
-      font-family: 'Syne', sans-serif;
-      font-size: 13px;
+    .table-row:hover { background: rgba(255,255,255,0.02); }
+    .table-row:last-child { border-bottom: none; }
+    .table-row.done { opacity: 0.35; }
+    .cell { display: flex; align-items: center; justify-content: center; }
+    .cell-check { width: 32px; }
+    .cell-account { flex: 1; min-width: 180px; flex-direction: row; align-items: center; justify-content: flex-start; gap: 12px; overflow: hidden; }
+    .cell-account .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--cream-dark); flex-shrink: 0; object-fit: cover; }
+    .cell-account .account-info { display: flex; flex-direction: column; gap: 2px; overflow: hidden; }
+    .cell-account strong { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cell-account span { font-size: 11px; color: var(--gray); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cell-mutual { width: 65px; }
+    .cell-date { width: 100px; font-size: 12px; color: var(--gray); }
+    .cell-num { width: 55px; font-size: 13px; }
+    .cell-action { width: 80px; }
+    .cell-action-wide { width: 95px; }
+    
+    .done-checkbox { width: 16px; height: 16px; accent-color: var(--success); cursor: pointer; }
+    .select-all-checkbox { width: 16px; height: 16px; accent-color: var(--green); cursor: pointer; }
+    
+    .action-link {
+      font-size: 11px; font-weight: 600; text-decoration: none;
+      padding: 5px 10px; border-radius: 4px; transition: all 0.15s;
     }
+    .action-link-danger { color: var(--danger); border: 1px solid var(--danger); }
+    .action-link-danger:hover { background: var(--danger); color: var(--dark); }
+    .action-link-success { color: var(--success); border: 1px solid var(--success); }
+    .action-link-success:hover { background: var(--success); color: var(--dark); }
 
-    .tip-address button:hover {
-      background: var(--gray);
+    /* Main tabs */
+    .main-tabs {
+      display: flex;
+      border-bottom: 2px solid var(--cream-dark);
+      margin-bottom: 20px;
     }
-
-    .tip-note {
-      font-size: 11px;
+    .main-tab {
+      flex: 1;
+      padding: 14px 16px;
+      background: none;
+      border: none;
       color: var(--gray);
-      margin-top: 8px;
+      font-family: 'Space Mono', monospace;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.2s;
+    }
+    .main-tab:hover { color: var(--dark); }
+    .main-tab.active { color: var(--dark) !important; }
+    .main-tab.active[data-tab="dead"] { border-bottom-color: var(--danger); color: var(--dark) !important; }
+    .main-tab.active[data-tab="people"] { border-bottom-color: var(--green); color: var(--dark) !important; }
+    .tab-count { margin-left: 6px; font-family: 'Space Mono', monospace; font-size: 13px; }
+    .main-tab[data-tab="dead"] .tab-count { color: var(--danger); }
+    .main-tab[data-tab="people"] .tab-count { color: var(--green); }
+    
+    .tab-content { }
+    .tab-desc { color: var(--dark); font-size: 14px; margin-bottom: 16px; }
+    
+    .table-controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .table-controls .search-input { flex: 1; min-width: 180px; margin: 0; }
+    .table-controls .filter-tabs { margin: 0; }
+    
+    .table-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12px;
+      padding-top: 12px;
+    }
+    .progress-text { color: var(--gray); font-size: 13px; }
+    .btn-sm { padding: 8px 14px; font-size: 12px; }
+    
+    .extension-cta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      background: linear-gradient(135deg, rgba(34, 211, 238, 0.08) 0%, transparent 100%);
+      border: 1px solid var(--cream-dark);
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-top: 32px;
+    }
+    .extension-cta h3 { font-size: 16px; margin-bottom: 4px; }
+    .extension-cta p { color: var(--gray); font-size: 13px; }
+    .account-item {
+      display: flex; align-items: center; gap: 16px;
+      padding: 16px; border-bottom: 1px solid var(--cream-dark);
+    }
+    .account-item:last-child { border-bottom: none; }
+    .account-checkbox { width: 20px; height: 20px; accent-color: var(--danger); }
+    .account-info { flex: 1; }
+    .account-name { font-weight: 600; margin-bottom: 2px; }
+    .account-handle { color: var(--gray); font-family: 'Space Mono', monospace; font-size: 13px; }
+    .account-badge { padding: 4px 10px; border-radius: 100px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
+    .badge-inactive { background: rgba(244, 63, 94, 0.15); color: var(--danger); }
+    .badge-active { background: rgba(34, 197, 94, 0.15); color: var(--success); }
+
+    .cta-bar {
+      position: sticky; bottom: 0; background: var(--dark);
+      border-top: 1px solid var(--cream-dark); padding: 24px 0; margin-top: 32px;
+    }
+    .cta-content { display: flex; justify-content: space-between; align-items: center; gap: 24px; }
+    .cta-info h3 { font-size: 20px; margin-bottom: 4px; }
+    .cta-info p { color: var(--gray); font-size: 14px; }
+    .price {
+      font-family: 'Space Mono', monospace;
+      background: rgba(255, 255, 255, 0.15); padding: 4px 10px; border-radius: 4px; font-size: 14px;
     }
 
-    @media (max-width: 600px) {
-      .features {
-        flex-direction: column;
-      }
-      h1 {
-        font-size: 32px;
-      }
+    /* Page 6: Final */
+    .final-page { padding: 80px 0; text-align: center; }
+    .highlight-box {
+      background: var(--cream-dark); border-radius: 12px;
+      padding: 24px; margin: 32px auto; max-width: 300px;
     }
+    .highlight-box h4 { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--gray); margin-bottom: 8px; }
+    .highlight-number { font-size: 48px; font-weight: 800; font-family: 'Space Mono', monospace; color: var(--danger); }
+
+    /* Tweet cards */
+    .tweets-list { display: flex; flex-direction: column; gap: 12px; }
+    .tweet-card {
+      background: var(--cream-dark); border-radius: 10px; padding: 16px;
+      border: 1px solid transparent; transition: border-color 0.2s;
+    }
+    .tweet-card:hover { border-color: var(--gray); }
+    .tweet-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .tweet-date { color: var(--gray); font-size: 12px; margin-left: auto; }
+    .tweet-text { font-size: 14px; line-height: 1.5; margin-bottom: 12px; word-break: break-word; }
+    .tweet-text a { color: var(--green); text-decoration: none; }
+    .tweet-stats { display: flex; gap: 20px; }
+    .tweet-stat { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--gray); }
+    .tweet-stat span { font-family: 'Space Mono', monospace; color: var(--cream); }
+    .tweet-link { margin-left: auto; }
+    .tweet-link a { color: var(--green); font-size: 12px; text-decoration: none; }
+    .tweet-link a:hover { text-decoration: underline; }
+
+    /* Insight cards */
+    .insight-card {
+      background: var(--cream-dark); border-radius: 12px; padding: 20px;
+    }
+    .filter-tabs-sm { gap: 4px; }
+    .filter-tabs-sm .filter-tab { padding: 4px 10px; font-size: 11px; }
+    
+    /* Modal */
+    .modal { display: flex; }
+    .modal-content { animation: modalIn 0.2s ease-out; }
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    
+    @media (max-width: 900px) {
+      .insights-grid { grid-template-columns: 1fr !important; }
+    }
+
+    .explanation {
+      background: linear-gradient(135deg, rgba(34, 211, 238, 0.1) 0%, transparent 100%);
+      border: 1px solid var(--cream-dark); border-radius: 12px; padding: 24px;
+      margin-top: 40px; text-align: left; max-width: 500px; margin-left: auto; margin-right: auto;
+    }
+    .explanation h4 { margin-bottom: 12px; }
+    .explanation p { color: var(--gray); font-size: 14px; line-height: 1.7; }
+
+    footer { padding: 40px 0; border-top: 1px solid var(--cream-dark); margin-top: 60px; }
+    footer p { color: var(--gray); font-size: 14px; text-align: center; }
   </style>
 </head>
 <body>
   <header>
-    <div class="header-inner">
-      <a href="index.html" class="logo">
-        <div class="logo-icon">⚡</div>
-        FixYourFeed
-      </a>
+    <div class="container">
+      <div class="logo" id="logoBtn">
+        <div class="logo-dot"></div>
+        fixyourfeed
+      </div>
     </div>
   </header>
 
-  <div class="container">
-    <h1>Free <span>Chrome Extension</span></h1>
-    <p class="subtitle">Automate the boring stuff. Bulk unfollow dead weight. Mass add to lists.</p>
+  <main>
+    <!-- Page 1: Hero + Archive Request Combined -->
+    <div class="page hero active" id="page1">
+      <div class="container">
+        <h1>the X algo is <span>broken</span></h1>
+        <p>Your feed is full of irrelevant garbage from accounts you don't care about. The algo buries the good stuff. Time to take control. FREE</p>
+        
+        <div class="value-props" style="display: flex; gap: 48px; justify-content: center; margin: 40px 0; flex-wrap: wrap;">
+          <div style="text-align: center; max-width: 240px;">
+            <div style="font-size: 24px; margin-bottom: 8px;">⭐</div>
+            <div style="font-size: 14px; color: var(--dark); font-weight: 700; margin-bottom: 4px;">curate your people</div>
+            <div style="font-size: 13px; color: var(--gray);">Build a list of accounts you actually engage with. Pin it to your feed tabs and only see posts from them — no algo interference</div>
+          </div>
+          <div style="text-align: center; max-width: 240px;">
+            <div style="font-size: 24px; margin-bottom: 8px;">💀</div>
+            <div style="font-size: 14px; color: var(--dark); font-weight: 700; margin-bottom: 4px;">cut the dead weight</div>
+            <div style="font-size: 13px; color: var(--gray);">Unfollow accounts you never engage with. Better ratio = algo favors you more. Less noise = better feed</div>
+          </div>
+        </div>
 
-    <div class="features">
-      <div class="feature">
-        <div class="feature-icon">💀</div>
-        <div class="feature-title">Bulk Unfollow</div>
-        <div class="feature-desc">Paste handles, hit go. Clean up your feed in minutes.</div>
-      </div>
-      <div class="feature">
-        <div class="feature-icon">⭐</div>
-        <div class="feature-title">Add to Lists</div>
-        <div class="feature-desc">Mass add accounts to any X list with one click.</div>
-      </div>
-    </div>
+        <!-- Archive section -->
+        <div style="max-width: 500px; margin: 0 auto;">
+          <h2 style="font-size: 20px; text-align: center; margin-bottom: 8px;">fix your feed</h2>
+          <p style="text-align: center; color: var(--gray); font-size: 14px; margin-bottom: 24px;">Upload your X archive and we'll show you exactly who to unfollow and who to curate <span style="opacity: 0.7;">(and some other insights)</span></p>
+          
+          <!-- Upload zone -->
+          <div class="upload-zone" id="uploadZone" style="margin-bottom: 16px;">
+            <div class="upload-icon">📁</div>
+            <h3>Drop your X archive here</h3>
+            <p>.zip or .json</p>
+          </div>
 
-    <div class="download-box">
-      <h2>Download Extension</h2>
-      <p>Free forever. No account required.</p>
-      <a href="fixfeed-extension.zip" download class="btn">Download .zip</a>
-    </div>
+          <div class="processing-info" id="processingInfo">
+            <div class="progress-bar">
+              <div class="progress-fill" id="uploadProgress"></div>
+            </div>
+            <div class="processing-status" id="uploadStatus">Processing...</div>
+          </div>
 
-    <div class="steps">
-      <h2>How to install</h2>
-      
-      <div class="step">
-        <div class="step-num">1</div>
-        <div class="step-content">
-          <h3>Download & unzip</h3>
-          <p>Click the download button above and extract the zip file somewhere on your computer.</p>
+          <!-- How to request archive -->
+          <details style="margin-bottom: 16px;">
+            <summary style="cursor: pointer; color: var(--gray); font-size: 15px; text-align: center; list-style: none; display: flex; align-items: center; justify-content: center; gap: 8px;">
+              <span>How do I request my X archive?</span>
+              <span style="font-size: 10px; transition: transform 0.2s;">▼</span>
+            </summary>
+            <div style="background: var(--cream-dark); border-radius: 12px; padding: 24px; margin-top: 16px; text-align: left;">
+              <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px;">
+                <div style="background: var(--green); color: var(--dark); width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; flex-shrink: 0;">1</div>
+                <div style="flex: 1;">
+                  <strong style="font-size: 14px;">Request your archive from X</strong>
+                  <p style="color: var(--gray); font-size: 13px; margin-top: 4px; margin-bottom: 12px;">X takes 24-48 hours to prepare it. They'll email you when it's ready.</p>
+                  <a href="https://x.com/settings/download_your_data" target="_blank" class="btn btn-sm" style="display: inline-flex; align-items: center; gap: 6px;">Request archive ↗</a>
+                </div>
+              </div>
+              <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 20px;">
+                <div style="background: var(--gray); color: var(--dark); width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; flex-shrink: 0;">2</div>
+                <div>
+                  <strong style="font-size: 14px;">Come back and upload</strong>
+                  <p style="color: var(--gray); font-size: 13px; margin-top: 4px;">Once it's ready, upload the zip file here. We'll analyze it in 30 seconds.</p>
+                </div>
+              </div>
+            </div>
+          </details>
+
+          <!-- Privacy-first option -->
+          <details style="margin-bottom: 24px;">
+            <summary style="cursor: pointer; color: var(--dark); font-size: 14px; text-align: center; list-style: none; display: flex; align-items: center; justify-content: center; gap: 8px;">
+              <span>Privacy-first option?</span>
+              <span style="font-size: 10px; transition: transform 0.2s;">▼</span>
+            </summary>
+            <div style="background: var(--cream-dark); border-radius: 4px; padding: 20px; margin-top: 16px;">
+              <p style="color: var(--dark); font-size: 13px; margin-bottom: 16px; text-align: center;">
+                Upload only these 4 files from your archive's <code style="background: var(--dark); color: var(--cream); padding: 2px 6px; border-radius: 2px;">data/</code> folder:
+              </p>
+              
+              <div style="display: grid; gap: 8px; margin-bottom: 16px;">
+                <div style="display: flex; align-items: center; gap: 10px; font-size: 13px;">
+                  <span class="file-status" id="statusFollowing" style="width: 20px; height: 20px; border-radius: 50%; background: var(--cream); border: 2px solid var(--gray); display: flex; align-items: center; justify-content: center; font-size: 10px;">−</span>
+                  <span style="color: var(--dark);">following.js</span>
+                  <span style="color: var(--gray); font-size: 11px; margin-left: auto;">who you follow</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; font-size: 13px;">
+                  <span class="file-status" id="statusFollower" style="width: 20px; height: 20px; border-radius: 50%; background: var(--cream); border: 2px solid var(--gray); display: flex; align-items: center; justify-content: center; font-size: 10px;">−</span>
+                  <span style="color: var(--dark);">follower.js</span>
+                  <span style="color: var(--gray); font-size: 11px; margin-left: auto;">who follows you</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; font-size: 13px;">
+                  <span class="file-status" id="statusLike" style="width: 20px; height: 20px; border-radius: 50%; background: var(--cream); border: 2px solid var(--gray); display: flex; align-items: center; justify-content: center; font-size: 10px;">−</span>
+                  <span style="color: var(--dark);">like.js</span>
+                  <span style="color: var(--gray); font-size: 11px; margin-left: auto;">tweets you liked</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; font-size: 13px;">
+                  <span class="file-status" id="statusTweets" style="width: 20px; height: 20px; border-radius: 50%; background: var(--cream); border: 2px solid var(--gray); display: flex; align-items: center; justify-content: center; font-size: 10px;">−</span>
+                  <span style="color: var(--dark);">tweets.js</span>
+                  <span style="color: var(--gray); font-size: 11px; margin-left: auto;">your tweets/replies</span>
+                </div>
+              </div>
+
+              <div class="upload-zone upload-zone-small" id="uploadZoneFiles" style="padding: 16px;">
+                <p style="margin: 0; font-size: 13px;">Drop files here or click to browse</p>
+              </div>
+
+              <button class="btn" id="processFilesBtn" style="width: 100%; margin-top: 12px;" disabled>
+                Process files <span id="filesReadyCount">(0/4 ready)</span>
+              </button>
+              
+              <p style="text-align: center; color: var(--success); font-size: 11px; margin-top: 12px; margin-bottom: 0;">
+                ✓ These files contain no DMs, emails, or personal data
+              </p>
+            </div>
+          </details>
+
+          <div style="text-align: center; margin-top: 24px; padding: 16px; background: var(--cream-dark); border-radius: 4px;">
+            <p style="color: var(--gray); font-size: 12px; line-height: 1.5; margin: 0;">
+              🔒 <strong>100% private</strong> — processed entirely in your browser. We never see, store, or access your data.
+            </p>
+          </div>
+        </div>
+
+        <!-- How it works section -->
+        <div style="max-width: 600px; margin: 60px auto 0; padding: 0 24px;">
+          <h3 style="font-size: 18px; text-align: center; margin-bottom: 24px;">how it works</h3>
+          
+          <div style="display: grid; gap: 20px;">
+            <div style="display: flex; gap: 16px; align-items: flex-start;">
+              <div style="font-size: 18px;">📊</div>
+              <div>
+                <strong style="font-size: 14px;">We analyze your actual engagement</strong>
+                <p style="color: var(--gray); font-size: 13px; margin-top: 4px;">Your archive contains every like, reply, and retweet. We crunch the data to show who you actually interact with vs who's just cluttering your feed.</p>
+              </div>
+            </div>
+            
+            <div style="display: flex; gap: 16px; align-items: flex-start;">
+              <div style="font-size: 18px;">⭐</div>
+              <div>
+                <strong style="font-size: 14px;">Build your curated list</strong>
+                <p style="color: var(--gray); font-size: 13px; margin-top: 4px;">See who you actually engage with, ranked. Add them to an X list, then pin that list as a tab in your feed. Now you have a clean timeline with only posts from people you care about — the algo can't touch it.</p>
+              </div>
+            </div>
+            
+            <div style="display: flex; gap: 16px; align-items: flex-start;">
+              <div style="font-size: 18px;">💀</div>
+              <div>
+                <strong style="font-size: 14px;">Unfollow the dead weight</strong>
+                <p style="color: var(--gray); font-size: 13px; margin-top: 4px;">Find accounts you follow but never engage with — zero likes, zero replies. Unfollowing them improves your follower ratio, which the algo actually rewards. Less noise, better reach.</p>
+              </div>
+            </div>
+            
+            <div style="display: flex; gap: 16px; align-items: flex-start;">
+              <div style="font-size: 18px;">⚡</div>
+              <div>
+                <strong style="font-size: 14px;">Automate the boring stuff</strong>
+                <p style="color: var(--gray); font-size: 13px; margin-top: 4px;">Our free browser extension lets you bulk unfollow hundreds of accounts and mass add to lists. What would take hours takes minutes.</p>
+              </div>
+            </div>
+          </div>
+          
+          <p style="text-align: center; color: var(--gray); font-size: 13px; margin-top: 32px;">Completely free. No account needed. No catch.</p>
+          
+          <p style="text-align: center; margin-top: 24px;">
+            <a href="https://x.com/OdysseySSSC" target="_blank" style="color: var(--dark); text-decoration: none; font-size: 13px;">follow me on X <code style="background: var(--dark); color: var(--cream); padding: 4px 8px; border-radius: 2px; font-size: 12px;">@OdysseySSSC</code></a>
+          </p>
         </div>
       </div>
-
-      <div class="step">
-        <div class="step-num">2</div>
-        <div class="step-content">
-          <h3>Open Chrome Extensions</h3>
-          <p>Go to <code>chrome://extensions</code> in your browser and enable <strong>Developer mode</strong> (toggle in top right).</p>
-        </div>
-      </div>
-
-      <div class="step">
-        <div class="step-num">3</div>
-        <div class="step-content">
-          <h3>Load the extension</h3>
-          <p>Click <strong>Load unpacked</strong> and select the folder you extracted.</p>
-        </div>
-      </div>
-
-      <div class="step">
-        <div class="step-num">4</div>
-        <div class="step-content">
-          <h3>Start using</h3>
-          <p>Make sure you're logged into X, then click the extension icon. Paste your handles and go!</p>
-        </div>
-      </div>
     </div>
 
-    <div class="tip-jar">
-      <p>Found this useful? Leave a tip 🙏</p>
-      <div class="tip-address">
-        <code id="tipAddress">0x1234...your-address-here</code>
-        <button id="copyTipBtn">Copy</button>
-      </div>
-      <p class="tip-note">Any EVM chain (ETH, Base, Optimism, etc.)</p>
-    </div>
+    <!-- Results Page -->
+    <div class="page analysis" id="page2">
+      <div class="container">
+          
+          <!-- Header with change option -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <div></div>
+            <button id="changeArchiveBtn" style="background: none; border: none; color: var(--gray); font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+              ↻ Upload different archive
+            </button>
+          </div>
+          
+          <!-- Main tabs -->
+          <div class="main-tabs">
+            <button class="main-tab active" data-tab="people">
+              ⭐ Your people <span class="tab-count" id="peopleCount">0</span>
+            </button>
+            <button class="main-tab" data-tab="dead">
+              💀 Dead weight <span class="tab-count" id="deadCount">0</span>
+            </button>
+          </div>
 
-    <div class="back-link">
-      <a href="index.html">← Back to FixYourFeed</a>
+          <!-- Dead weight section -->
+          <div id="deadSection" class="tab-content" style="display: none;">
+            <p class="tab-desc">Zero engagement. Clogging your feed. Time to cut them loose.</p>
+            
+            <div class="table-controls">
+              <input type="text" class="search-input" id="searchInputDead" placeholder="Search...">
+              <div class="filter-tabs" id="filterTabsDead">
+                <button class="filter-tab active" data-filter="zero">No engagement</button>
+                <button class="filter-tab" data-filter="noFollowBack">Doesn't follow back</button>
+                <button class="filter-tab" data-filter="all">All accounts</button>
+              </div>
+            </div>
+
+            <div class="sortable-table">
+              <div class="table-header" id="deadTableHeader">
+                <div class="th th-check"><input type="checkbox" id="selectAllDead" class="select-all-checkbox" title="Select all"></div>
+                <div class="th th-account sortable" data-sort="name">Account</div>
+                <div class="th th-mutual sortable" data-sort="followsBack">Mutual</div>
+                <div class="th th-date sortable active-sort desc" data-sort="lastEngaged">Last engaged ↓</div>
+                <div class="th th-num sortable" data-sort="likes">Likes</div>
+                <div class="th th-num sortable" data-sort="replies">Replies</div>
+                <div class="th th-num sortable" data-sort="engagements">Total</div>
+                <div class="th th-action"></div>
+              </div>
+              <div class="table-body" id="deadList"></div>
+            </div>
+
+            <div class="table-footer">
+              <span class="progress-text"><span id="totalDeadCount">0</span> accounts</span>
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="font-size: 12px; color: var(--gray);">Use with our free extension to mass unfollow →</span>
+                <button class="btn btn-secondary btn-sm" id="copyDeadBtn">Copy handles</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Your people section -->
+          <div id="peopleSection" class="tab-content">
+            <p class="tab-desc">The accounts you actually care about. Add them to a list and never miss a post.</p>
+            
+            <div class="table-controls">
+              <input type="text" class="search-input" id="searchInputPeople" placeholder="Search...">
+              <div class="filter-tabs" id="filterTabsPeople">
+                <button class="filter-tab active" data-filter="all">All accounts</button>
+                <button class="filter-tab" data-filter="mutual">Follows back</button>
+              </div>
+            </div>
+
+            <div class="sortable-table">
+              <div class="table-header" id="peopleTableHeader">
+                <div class="th th-check"><input type="checkbox" id="selectAllPeople" class="select-all-checkbox" title="Select all"></div>
+                <div class="th th-account sortable" data-sort="name">Account</div>
+                <div class="th th-mutual sortable" data-sort="followsBack">Mutual</div>
+                <div class="th th-date sortable" data-sort="lastEngaged">Last engaged</div>
+                <div class="th th-num sortable active-sort desc" data-sort="engagements">Total ↓</div>
+                <div class="th th-num sortable" data-sort="likes">Likes</div>
+                <div class="th th-num sortable" data-sort="replies">Replies</div>
+                <div class="th th-action"></div>
+              </div>
+              <div class="table-body" id="peopleList"></div>
+            </div>
+
+            <div class="table-footer">
+              <span class="progress-text"><span id="totalPeopleCount">0</span> accounts</span>
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="font-size: 12px; color: var(--gray);">Use with our free extension to add to a list →</span>
+                <button class="btn btn-secondary btn-sm" id="copyPeopleBtn">Copy handles</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Extension CTA -->
+          <div class="extension-cta">
+            <div>
+              <h3>⚡ Automate the boring stuff</h3>
+              <p>Bulk unfollow dead weight. Mass add to lists. One click.</p>
+            </div>
+            <button class="btn" id="getExtensionBtn">Get Free Extension</button>
+          </div>
+
+          <!-- Tip jar -->
+          <div style="text-align: center; margin-top: 24px; padding: 20px; background: var(--cream-dark); border-radius: 4px;">
+            <p style="color: var(--gray); font-size: 14px; margin-bottom: 12px;">Found this useful? Leave a tip 🤙</p>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+              <code id="tipAddress" style="background: var(--dark); padding: 10px 14px; border-radius: 4px; font-size: 12px; color: var(--cream);">0x9FD6F93Cb85dadF4437B83f0281B50024fE5f8b0</code>
+              <button id="copyTipBtn" class="btn btn-sm btn-secondary" style="padding: 10px 14px;">Copy</button>
+            </div>
+            <p style="color: var(--gray); font-size: 11px; margin-top: 8px;">Any EVM chain (ETH, Base, etc.)</p>
+            <p style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--cream);">
+              <a href="https://x.com/OdysseySSSC" target="_blank" style="color: var(--dark); text-decoration: none; font-size: 13px;">follow me on X <code style="background: var(--dark); color: var(--cream); padding: 4px 8px; border-radius: 2px; font-size: 12px;">@OdysseySSSC</code></a>
+            </p>
+          </div>
+
+          <!-- Insights Section -->
+          <div class="insights-section" style="margin-top: 48px; padding-top: 48px; border-top: 1px solid var(--cream-dark);">
+            <h2 style="font-size: 20px; margin-bottom: 32px; color: var(--dark);">📊 Insights</h2>
+            
+            <div class="insights-grid" style="display: grid; grid-template-columns: 1fr; gap: 32px;">
+              
+              <!-- Top Tweets -->
+              <div class="insight-card">
+                <div class="insight-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                  <h3 style="font-size: 16px; display: flex; align-items: center; gap: 8px; color: var(--dark);">🔥 Top Tweets <span style="color: var(--gray); font-weight: 400; font-size: 14px;" id="topTweetsCount2"></span></h3>
+                  <div class="filter-tabs filter-tabs-sm" id="filterTabsTweets">
+                    <button class="filter-tab active" data-filter="all">All accounts</button>
+                    <button class="filter-tab" data-filter="original">Original</button>
+                    <button class="filter-tab" data-filter="replies">Replies</button>
+                  </div>
+                </div>
+                <input type="text" class="search-input" id="searchInputTweets" placeholder="Search tweets..." style="margin-bottom: 12px;">
+                <div class="tweets-list" id="topTweetsList" style="max-height: 400px; overflow-y: auto;"></div>
+              </div>
+
+              <!-- Most Mentioned -->
+              <div class="insight-card">
+                <div class="insight-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                  <h3 style="font-size: 16px; display: flex; align-items: center; gap: 8px; color: var(--dark);">📣 Most Mentioned <span style="color: var(--gray); font-weight: 400; font-size: 14px;" id="mentionsCount2"></span></h3>
+                </div>
+                <input type="text" class="search-input" id="searchInputMentions" placeholder="Search..." style="margin-bottom: 12px;">
+                <div class="sortable-table" style="max-height: 400px; overflow-y: auto;">
+                  <div class="table-header" id="mentionsTableHeader">
+                    <div class="th th-account">Account</div>
+                    <div class="th th-num sortable active-sort desc" data-sort="mentions">Mentions ↓</div>
+                    <div class="th th-num sortable" data-sort="replies">Replies</div>
+                    <div class="th th-date sortable" data-sort="lastMentioned">Last</div>
+                  </div>
+                  <div class="table-body" id="mentionsList"></div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+      </div>
     </div>
-  </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>FixYourFeed — Take back your timeline.</p>
+    </div>
+  </footer>
 
   <script>
+    // State
+    let currentPage = 1;
+    let allAccounts = [];
+    let allTweets = [];
+    let allMentions = [];
+
+    // Real profile data
+    const knownProfiles = {
+      'odysseysssc': {
+        name: 'Odyssey 🤙',
+        handle: 'odysseysssc',
+        following: 3426,
+        followers: 5143,
+        joinedYear: 2012
+      }
+    };
+
+    // Sample data with engagement metrics from archive
+    const sampleAccounts = [
+      { handle: 'naval', name: 'Naval', followsBack: true, followedSince: '2018-03', engagements: 47, likes: 32, replies: 12, rts: 3, lastInteraction: '2025-12' },
+      { handle: 'pmarca', name: 'Marc Andreessen', followsBack: false, followedSince: '2019-06', engagements: 23, likes: 18, replies: 4, rts: 1, lastInteraction: '2025-11' },
+      { handle: 'elonmusk', name: 'Elon Musk', followsBack: false, followedSince: '2017-01', engagements: 15, likes: 12, replies: 2, rts: 1, lastInteraction: '2026-01' },
+      { handle: 'vitalikbuterin', name: 'Vitalik Buterin', followsBack: false, followedSince: '2020-08', engagements: 31, likes: 22, replies: 6, rts: 3, lastInteraction: '2025-10' },
+      { handle: 'balajis', name: 'Balaji', followsBack: false, followedSince: '2021-02', engagements: 19, likes: 14, replies: 3, rts: 2, lastInteraction: '2025-09' },
+      { handle: 'jessepollak', name: 'Jesse Pollak', followsBack: true, followedSince: '2023-05', engagements: 52, likes: 35, replies: 12, rts: 5, lastInteraction: '2026-01' },
+      { handle: 'techcrunch', name: 'TechCrunch', followsBack: false, followedSince: '2015-09', engagements: 2, likes: 2, replies: 0, rts: 0, lastInteraction: '2024-03' },
+      { handle: 'randomstartup', name: 'Random Startup', followsBack: false, followedSince: '2022-11', engagements: 0, likes: 0, replies: 0, rts: 0, lastInteraction: null },
+      { handle: 'oldcontact', name: 'Old Contact', followsBack: true, followedSince: '2014-06', engagements: 1, likes: 1, replies: 0, rts: 0, lastInteraction: '2023-08' },
+      { handle: 'newsbot', name: 'News Bot', followsBack: false, followedSince: '2021-03', engagements: 0, likes: 0, replies: 0, rts: 0, lastInteraction: null },
+      { handle: 'deadaccount2019', name: 'Inactive Since 2019', followsBack: false, followedSince: '2018-02', engagements: 0, likes: 0, replies: 0, rts: 0, lastInteraction: null },
+      { handle: 'brandaccount', name: 'Some Brand', followsBack: false, followedSince: '2020-07', engagements: 0, likes: 0, replies: 0, rts: 0, lastInteraction: null },
+      { handle: 'spammy_promo', name: 'Spammy Promo', followsBack: false, followedSince: '2023-01', engagements: 0, likes: 0, replies: 0, rts: 0, lastInteraction: null },
+      { handle: 'forgottenfollow', name: 'Who Is This', followsBack: false, followedSince: '2019-04', engagements: 0, likes: 0, replies: 0, rts: 0, lastInteraction: null },
+      { handle: 'coingecko', name: 'CoinGecko', followsBack: false, followedSince: '2021-08', engagements: 3, likes: 2, replies: 1, rts: 0, lastInteraction: '2024-06' },
+      { handle: 'oldpodcast', name: 'Podcast I Never Listen To', followsBack: false, followedSince: '2017-11', engagements: 0, likes: 0, replies: 0, rts: 0, lastInteraction: null },
+      { handle: 'randominfluencer', name: 'Random Influencer', followsBack: false, followedSince: '2022-05', engagements: 0, likes: 0, replies: 0, rts: 0, lastInteraction: null },
+      { handle: 'deadproject', name: 'Dead Project', followsBack: false, followedSince: '2021-06', engagements: 0, likes: 0, replies: 0, rts: 0, lastInteraction: null },
+      { handle: 'nft_thing', name: 'NFT Project', followsBack: false, followedSince: '2022-01', engagements: 1, likes: 1, replies: 0, rts: 0, lastInteraction: '2023-05' },
+      { handle: 'cryptonews', name: 'Crypto News', followsBack: false, followedSince: '2020-12', engagements: 0, likes: 0, replies: 0, rts: 0, lastInteraction: null },
+      { handle: 'ghostaccount', name: 'Ghost', followsBack: false, followedSince: '2016-08', engagements: 0, likes: 0, replies: 0, rts: 0, lastInteraction: null },
+      { handle: 'nobodyknows', name: 'Anonymous User', followsBack: false, followedSince: '2023-09', engagements: 0, likes: 0, replies: 0, rts: 0, lastInteraction: null },
+      { handle: 'oldcryptoproject', name: 'Dead Coin', followsBack: false, followedSince: '2019-12', engagements: 0, likes: 0, replies: 0, rts: 0, lastInteraction: null },
+    ];
+
+    // Navigate
+    function goToPage(num) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById('page' + num).classList.add('active');
+      currentPage = num;
+    }
+
+    function showLoading(handle) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById('loadingPage').classList.add('active');
+      document.getElementById('loadingHandle').textContent = handle;
+    }
+
+    function formatNum(n) {
+      if (n >= 1000000) return (n/1000000).toFixed(1) + 'M';
+      if (n >= 1000) return (n/1000).toFixed(1) + 'K';
+      return n.toString();
+    }
+
+    // Logo click - restart
+    document.getElementById('logoBtn').addEventListener('click', function() {
+      goToPage(1);
+    });
+
+    // Page 2: Upload zone - real file upload with archive parsing
+
+    // Individual files state for privacy-first option
+    var individualFiles = {
+      following: null,
+      follower: null,
+      like: null,
+      tweets: null
+    };
+
+    var uploadZoneFiles = document.getElementById('uploadZoneFiles');
+    var fileInputMultiple = document.createElement('input');
+    fileInputMultiple.type = 'file';
+    fileInputMultiple.multiple = true;
+    fileInputMultiple.accept = '.js,.json';
+    fileInputMultiple.style.display = 'none';
+    document.body.appendChild(fileInputMultiple);
+
+    uploadZoneFiles.addEventListener('click', function() {
+      fileInputMultiple.click();
+    });
+
+    uploadZoneFiles.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      this.style.borderColor = 'var(--green)';
+      this.style.background = 'var(--green-dim)';
+    });
+
+    uploadZoneFiles.addEventListener('dragleave', function(e) {
+      e.preventDefault();
+      this.style.borderColor = '';
+      this.style.background = '';
+    });
+
+    uploadZoneFiles.addEventListener('drop', function(e) {
+      e.preventDefault();
+      this.style.borderColor = '';
+      this.style.background = '';
+      handleIndividualFiles(e.dataTransfer.files);
+    });
+
+    fileInputMultiple.addEventListener('change', function() {
+      handleIndividualFiles(this.files);
+    });
+
+    function handleIndividualFiles(files) {
+      for (var i = 0; i < files.length; i++) {
+        var file = files[i];
+        var name = file.name.toLowerCase();
+        
+        if (name === 'following.js' || name === 'following.json') individualFiles.following = file;
+        else if (name === 'follower.js' || name === 'follower.json' || name === 'followers.json') individualFiles.follower = file;
+        else if (name === 'like.js' || name === 'like.json' || name === 'likes.json') individualFiles.like = file;
+        else if (name === 'tweets.js' || name === 'tweets.json') individualFiles.tweets = file;
+      }
+      updateFileStatus();
+    }
+
+    function updateFileStatus() {
+      var count = 0;
+      
+      if (individualFiles.following) {
+        document.getElementById('statusFollowing').textContent = '✓';
+        document.getElementById('statusFollowing').style.borderColor = 'var(--success)';
+        document.getElementById('statusFollowing').style.color = 'var(--success)';
+        count++;
+      }
+      if (individualFiles.follower) {
+        document.getElementById('statusFollower').textContent = '✓';
+        document.getElementById('statusFollower').style.borderColor = 'var(--success)';
+        document.getElementById('statusFollower').style.color = 'var(--success)';
+        count++;
+      }
+      if (individualFiles.like) {
+        document.getElementById('statusLike').textContent = '✓';
+        document.getElementById('statusLike').style.borderColor = 'var(--success)';
+        document.getElementById('statusLike').style.color = 'var(--success)';
+        count++;
+      }
+      if (individualFiles.tweets) {
+        document.getElementById('statusTweets').textContent = '✓';
+        document.getElementById('statusTweets').style.borderColor = 'var(--success)';
+        document.getElementById('statusTweets').style.color = 'var(--success)';
+        count++;
+      }
+      
+      document.getElementById('filesReadyCount').textContent = '(' + count + '/4 ready)';
+      document.getElementById('processFilesBtn').disabled = count < 2; // Need at least following + one engagement file
+    }
+
+    document.getElementById('processFilesBtn').addEventListener('click', function() {
+      processIndividualFiles();
+    });
+
+    async function processIndividualFiles() {
+      const info = document.getElementById('processingInfo');
+      const progress = document.getElementById('uploadProgress');
+      const status = document.getElementById('uploadStatus');
+
+      info.classList.add('active');
+      progress.style.width = '10%';
+      status.textContent = 'Processing files...';
+
+      try {
+        var followingData = [];
+        var followerData = [];
+        var likeData = [];
+        var tweetsData = [];
+
+        if (individualFiles.following) {
+          progress.style.width = '20%';
+          status.textContent = 'Reading following...';
+          var content = await individualFiles.following.text();
+          followingData = parseTwitterJS(content);
+        }
+
+        if (individualFiles.follower) {
+          progress.style.width = '35%';
+          status.textContent = 'Reading followers...';
+          var content = await individualFiles.follower.text();
+          followerData = parseTwitterJS(content);
+        }
+
+        if (individualFiles.like) {
+          progress.style.width = '50%';
+          status.textContent = 'Reading likes...';
+          var content = await individualFiles.like.text();
+          likeData = parseTwitterJS(content);
+        }
+
+        if (individualFiles.tweets) {
+          progress.style.width = '65%';
+          status.textContent = 'Reading tweets...';
+          var content = await individualFiles.tweets.text();
+          tweetsData = parseTwitterJS(content);
+        }
+
+        progress.style.width = '80%';
+        status.textContent = 'Analyzing engagement...';
+
+        // Build follower set
+        var followerHandles = new Set();
+        followerData.forEach(function(f) {
+          var handle = f.follower?.userLink?.split('/').pop()?.toLowerCase();
+          if (handle) followerHandles.add(handle);
+        });
+
+        // Count likes per user (last 2 years only)
+        var likeCounts = {};
+        var lastLikeDates = {};
+        var twoYearsAgo = new Date();
+        twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
+        var cutoffDate = twoYearsAgo.toISOString().slice(0, 7); // YYYY-MM format
+        
+        likeData.forEach(function(l) {
+          var url = l.like?.expandedUrl || '';
+          var match = url.match(/twitter\.com\/([^\/]+)\/status/i) || url.match(/x\.com\/([^\/]+)\/status/i);
+          if (match) {
+            var handle = match[1].toLowerCase();
+            if (handle !== 'i') {
+              var date = l.like?.tweetId ? extractDateFromId(l.like.tweetId) : null;
+              // Only count if within last 2 years
+              if (!date || date >= cutoffDate) {
+                likeCounts[handle] = (likeCounts[handle] || 0) + 1;
+                if (date && (!lastLikeDates[handle] || date > lastLikeDates[handle])) {
+                  lastLikeDates[handle] = date;
+                }
+              }
+            }
+          }
+        });
+
+        // Count replies per user and collect top tweets (last 2 years only)
+        var replyCounts = {};
+        var lastReplyDates = {};
+        allTweets = [];
+        
+        tweetsData.forEach(function(t) {
+          var tweet = t.tweet;
+          var replyTo = tweet?.in_reply_to_screen_name?.toLowerCase();
+          var tweetDate = tweet?.created_at ? tweet.created_at.slice(0, 7) : null;
+          
+          // Only count replies from last 2 years
+          if (replyTo && (!tweetDate || tweetDate >= cutoffDate)) {
+            replyCounts[replyTo] = (replyCounts[replyTo] || 0) + 1;
+            if (tweetDate && (!lastReplyDates[replyTo] || tweetDate > lastReplyDates[replyTo])) {
+              lastReplyDates[replyTo] = tweetDate;
+            }
+          }
+          
+          // Collect tweets for Top Tweets (last 2 years only)
+          var likes = parseInt(tweet?.favorite_count) || 0;
+          var retweets = parseInt(tweet?.retweet_count) || 0;
+          if ((likes + retweets > 0) && (!tweetDate || tweetDate >= cutoffDate)) {
+            allTweets.push({
+              id: tweet?.id_str || tweet?.id,
+              text: tweet?.full_text || '',
+              likes: likes,
+              retweets: retweets,
+              date: tweet?.created_at,
+              isReply: !!replyTo,
+              score: likes + retweets
+            });
+          }
+        });
+
+        allTweets.sort(function(a, b) { return b.score - a.score; });
+
+        // Build accounts list
+        allAccounts = [];
+        followingData.forEach(function(f) {
+          var handle = f.following?.userLink?.split('/').pop()?.toLowerCase();
+          var name = f.following?.userLink?.split('/').pop() || handle;
+          
+          if (handle) {
+            var likes = likeCounts[handle] || 0;
+            var replies = replyCounts[handle] || 0;
+            var lastLike = lastLikeDates[handle];
+            var lastReply = lastReplyDates[handle];
+            var lastEngaged = null;
+            if (lastLike && lastReply) lastEngaged = lastLike > lastReply ? lastLike : lastReply;
+            else lastEngaged = lastLike || lastReply;
+
+            allAccounts.push({
+              handle: handle,
+              name: name,
+              followsBack: followerHandles.has(handle),
+              likes: likes,
+              replies: replies,
+              engagements: likes + replies,
+              lastEngaged: lastEngaged
+            });
+          }
+        });
+
+        allAccounts.sort(function(a, b) { return b.engagements - a.engagements; });
+
+        progress.style.width = '100%';
+        status.textContent = 'Complete!';
+
+        await new Promise(function(r) { setTimeout(r, 500); });
+
+        var deadAccounts = allAccounts.filter(function(a) { return a.engagements === 0; });
+        var engagedAccounts = allAccounts.filter(function(a) { return a.engagements > 0; });
+
+        document.getElementById('deadCount').textContent = deadAccounts.length;
+        document.getElementById('peopleCount').textContent = engagedAccounts.length;
+        document.getElementById('totalDeadCount').textContent = deadAccounts.length;
+        document.getElementById('totalPeopleCount').textContent = engagedAccounts.length;
+        document.getElementById('topTweetsCount2').textContent = Math.min(allTweets.length, 50);
+        document.getElementById('mentionsCount2').textContent = allMentions.length;
+
+        document.getElementById('page1').classList.remove('active');
+        document.getElementById('page2').classList.add('active');
+        
+        showResultsOrListSetup();
+
+        renderDeadList();
+        renderPeopleList();
+        renderTopTweets();
+        renderMentionsList();
+
+      } catch (err) {
+        console.error('Error processing files:', err);
+        status.textContent = 'Error: ' + err.message;
+        progress.style.background = 'var(--danger)';
+      }
+    }
+
+    function extractDateFromId(tweetId) {
+      try {
+        var id = BigInt(tweetId);
+        var timestamp = Number(id >> 22n) + 1288834974657;
+        var date = new Date(timestamp);
+        return date.toISOString().slice(0, 7);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    // Full zip upload (also handles combined JSON from Community Archive)
+    var uploadZone = document.getElementById('uploadZone');
+    var fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '.zip,.json';
+    fileInput.style.display = 'none';
+    document.body.appendChild(fileInput);
+
+    uploadZone.addEventListener('click', function() {
+      fileInput.click();
+    });
+
+    uploadZone.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      this.style.borderColor = 'var(--green)';
+      this.style.background = 'var(--green-dim)';
+    });
+
+    uploadZone.addEventListener('dragleave', function(e) {
+      e.preventDefault();
+      this.style.borderColor = '';
+      this.style.background = '';
+    });
+
+    uploadZone.addEventListener('drop', function(e) {
+      e.preventDefault();
+      this.style.borderColor = '';
+      this.style.background = '';
+      if (e.dataTransfer.files.length > 0) {
+        var file = e.dataTransfer.files[0];
+        if (file.name.endsWith('.json')) {
+          processCommunityArchive(file);
+        } else {
+          processArchive(file);
+        }
+      }
+    });
+
+    fileInput.addEventListener('change', function() {
+      if (this.files.length > 0) {
+        var file = this.files[0];
+        if (file.name.endsWith('.json')) {
+          processCommunityArchive(file);
+        } else {
+          processArchive(file);
+        }
+      }
+    });
+
+    // Process Community Archive combined JSON file
+    async function processCommunityArchive(file) {
+      const info = document.getElementById('processingInfo');
+      const progress = document.getElementById('uploadProgress');
+      const status = document.getElementById('uploadStatus');
+
+      info.classList.add('active');
+      progress.style.width = '10%';
+      status.textContent = 'Reading Community Archive...';
+
+      try {
+        var content = await file.text();
+        var data = JSON.parse(content);
+
+        progress.style.width = '30%';
+        status.textContent = 'Parsing accounts...';
+
+        // Get username from account data
+        var myUsername = data.account?.[0]?.account?.username?.toLowerCase() || '';
+
+        // Build follower set from IDs (we'll match by ID later if needed)
+        var followerIds = new Set();
+        if (data.follower) {
+          data.follower.forEach(function(f) {
+            var id = f.follower?.accountId;
+            if (id) followerIds.add(id);
+          });
+        }
+
+        // Build following map - accountId -> true (we need to resolve handles from tweets)
+        var followingIds = new Set();
+        if (data.following) {
+          data.following.forEach(function(f) {
+            var id = f.following?.accountId;
+            if (id) followingIds.add(id);
+          });
+        }
+
+        progress.style.width = '50%';
+        status.textContent = 'Analyzing tweets & mentions...';
+
+        // 2-year cutoff
+        var twoYearsAgo = new Date();
+        twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
+        var cutoffDate = twoYearsAgo.toISOString().slice(0, 7); // YYYY-MM format
+
+        // Parse tweets for replies, top tweets, and mentions
+        var replyCounts = {};
+        var lastEngagedDates = {};
+        var handleToId = {}; // Map handles to IDs from mentions
+        var mentionCounts = {};
+        var mentionDates = {};
+        allTweets = [];
+
+        if (data.tweets) {
+          data.tweets.forEach(function(t) {
+            var tweet = t.tweet;
+            var replyTo = tweet?.in_reply_to_screen_name;
+            var replyToId = tweet?.in_reply_to_user_id;
+            var createdAt = tweet?.created_at;
+            var text = tweet?.full_text || tweet?.text || '';
+            var likes = parseInt(tweet?.favorite_count) || 0;
+            var retweets = parseInt(tweet?.retweet_count) || 0;
+            var id = tweet?.id_str || tweet?.id;
+            
+            // Check if within last 2 years
+            var tweetDateStr = null;
+            if (createdAt) {
+              var date = new Date(createdAt);
+              tweetDateStr = date.toISOString().slice(0, 7);
+            }
+            var isRecent = !tweetDateStr || tweetDateStr >= cutoffDate;
+
+            // Skip self-replies for reply counting (only count recent)
+            if (replyTo && replyTo.toLowerCase() !== myUsername && isRecent) {
+              var handle = replyTo.toLowerCase();
+              replyCounts[handle] = (replyCounts[handle] || 0) + 1;
+              
+              // Track handle to ID mapping
+              if (replyToId) {
+                handleToId[handle] = replyToId;
+              }
+
+              if (tweetDateStr) {
+                if (!lastEngagedDates[handle] || tweetDateStr > lastEngagedDates[handle]) {
+                  lastEngagedDates[handle] = tweetDateStr;
+                }
+              }
+            }
+
+            // Track mentions (only recent)
+            if (isRecent) {
+              var mentions = tweet?.entities?.user_mentions || [];
+              mentions.forEach(function(m) {
+                if (m.screen_name && m.id_str) {
+                  var mHandle = m.screen_name.toLowerCase();
+                  handleToId[mHandle] = m.id_str;
+                  // Don't count self-mentions
+                  if (mHandle !== myUsername) {
+                    mentionCounts[mHandle] = (mentionCounts[mHandle] || 0) + 1;
+                    if (tweetDateStr) {
+                      if (!mentionDates[mHandle] || tweetDateStr > mentionDates[mHandle]) {
+                        mentionDates[mHandle] = tweetDateStr;
+                      }
+                    }
+                  }
+                }
+              });
+            }
+            
+            // Collect tweets for top tweets (exclude pure retweets, only recent)
+            if (!text.startsWith('RT @') && isRecent) {
+              allTweets.push({
+                id: id,
+                text: text,
+                likes: likes,
+                retweets: retweets,
+                score: likes + retweets,
+                date: createdAt,
+                isReply: !!replyTo
+              });
+            }
+          });
+        }
+        
+        // Sort tweets by score
+        allTweets.sort(function(a, b) { return b.score - a.score; });
+        
+        // Build mentions list
+        allMentions = Object.keys(mentionCounts).map(function(handle) {
+          return {
+            handle: handle,
+            mentions: mentionCounts[handle],
+            replies: replyCounts[handle] || 0,
+            lastMentioned: mentionDates[handle] || null
+          };
+        });
+        allMentions.sort(function(a, b) { return b.mentions - a.mentions; });
+
+        progress.style.width = '70%';
+        status.textContent = 'Building account list...';
+
+        // Build accounts list from handles we know
+        // We can only include accounts we've interacted with (replied to or mentioned)
+        var knownHandles = Object.keys(replyCounts);
+        
+        allAccounts = knownHandles.map(function(handle) {
+          var id = handleToId[handle];
+          var followsBack = id ? followerIds.has(id) : false;
+          var replies = replyCounts[handle] || 0;
+          return {
+            handle: handle,
+            name: handle,
+            followsBack: followsBack,
+            followedSince: null,
+            engagements: replies,
+            likes: 0, // Can't determine from Community Archive format
+            replies: replies,
+            lastEngaged: lastEngagedDates[handle] || null
+          };
+        });
+
+        // Sort by engagement
+        allAccounts.sort(function(a, b) { return b.engagements - a.engagements; });
+
+        progress.style.width = '100%';
+        status.textContent = 'Complete!';
+
+        await new Promise(function(r) { setTimeout(r, 500); });
+
+        // Setup results
+        var deadAccounts = allAccounts.filter(function(a) { return a.engagements === 0; });
+        var engagedAccounts = allAccounts.filter(function(a) { return a.engagements > 0; });
+
+        document.getElementById('deadCount').textContent = deadAccounts.length;
+        document.getElementById('peopleCount').textContent = engagedAccounts.length;
+        document.getElementById('totalDeadCount').textContent = deadAccounts.length;
+        document.getElementById('totalPeopleCount').textContent = engagedAccounts.length;
+        document.getElementById('topTweetsCount2').textContent = Math.min(allTweets.length, 50);
+        document.getElementById('mentionsCount2').textContent = allMentions.length;
+
+        // Switch to results page
+        document.getElementById('page1').classList.remove('active');
+        document.getElementById('page2').classList.add('active');
+        
+        showResultsOrListSetup();
+
+        renderDeadList();
+        renderPeopleList();
+        renderTopTweets();
+        renderMentionsList();
+
+      } catch (err) {
+        console.error('Error processing Community Archive:', err);
+        status.textContent = 'Error: ' + err.message;
+        progress.style.background = 'var(--danger)';
+      }
+    }
+
+    async function processArchive(file) {
+      const info = document.getElementById('processingInfo');
+      const progress = document.getElementById('uploadProgress');
+      const status = document.getElementById('uploadStatus');
+
+      info.classList.add('active');
+      progress.style.width = '10%';
+      status.textContent = 'Reading archive...';
+
+      try {
+        // Load JSZip dynamically
+        if (typeof JSZip === 'undefined') {
+          await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');
+        }
+
+        progress.style.width = '20%';
+        status.textContent = 'Extracting files...';
+
+        const zip = await JSZip.loadAsync(file);
+        
+        progress.style.width = '30%';
+        status.textContent = 'Parsing following list...';
+
+        // Parse following
+        var following = [];
+        var followingFile = zip.file(/following\.js$/i)[0];
+        if (followingFile) {
+          var followingContent = await followingFile.async('string');
+          var followingData = parseTwitterJS(followingContent);
+          following = followingData.map(function(f) {
+            var link = f.following?.userLink || '';
+            var handle = link.split('/').pop();
+            return handle;
+          }).filter(Boolean);
+        }
+
+        progress.style.width = '40%';
+        status.textContent = 'Parsing followers...';
+
+        // Parse followers
+        var followers = [];
+        var followerFile = zip.file(/follower\.js$/i)[0];
+        if (followerFile) {
+          var followerContent = await followerFile.async('string');
+          var followerData = parseTwitterJS(followerContent);
+          followers = followerData.map(function(f) {
+            var link = f.follower?.userLink || '';
+            var handle = link.split('/').pop();
+            return handle;
+          }).filter(Boolean);
+        }
+        var followerSet = new Set(followers);
+
+        progress.style.width = '60%';
+        status.textContent = 'Analyzing likes...';
+
+        // 2-year cutoff
+        var twoYearsAgo = new Date();
+        twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
+        var cutoffDate = twoYearsAgo.toISOString().slice(0, 7); // YYYY-MM format
+
+        // Parse likes - track counts and dates (last 2 years only)
+        var likeCounts = {};
+        var lastEngagedDates = {};
+        var likeFile = zip.file(/like\.js$/i)[0];
+        if (likeFile) {
+          var likeContent = await likeFile.async('string');
+          var likeData = parseTwitterJS(likeContent);
+          likeData.forEach(function(l) {
+            var url = l.like?.expandedUrl || '';
+            var match = url.match(/x\.com\/([^\/]+)\//i) || url.match(/twitter\.com\/([^\/]+)\//i);
+            if (match) {
+              var handle = match[1].toLowerCase();
+              var date = l.like?.tweetId ? extractDateFromId(l.like.tweetId) : null;
+              // Only count if within last 2 years
+              if (!date || date >= cutoffDate) {
+                likeCounts[handle] = (likeCounts[handle] || 0) + 1;
+                if (date && (!lastEngagedDates[handle] || date > lastEngagedDates[handle])) {
+                  lastEngagedDates[handle] = date;
+                }
+              }
+            }
+          });
+        }
+
+        progress.style.width = '80%';
+        status.textContent = 'Processing tweets & mentions...';
+
+        // Parse tweets for replies, top tweets, and mentions (last 2 years only)
+        var replyCounts = {};
+        var mentionCounts = {};
+        var mentionDates = {};
+        allTweets = [];
+        
+        var tweetsFile = zip.file(/tweets\.js$/i)[0];
+        if (tweetsFile) {
+          var tweetsContent = await tweetsFile.async('string');
+          var tweetsData = parseTwitterJS(tweetsContent);
+          tweetsData.forEach(function(t) {
+            var tweet = t.tweet;
+            var replyTo = tweet?.in_reply_to_screen_name;
+            var createdAt = tweet?.created_at;
+            var text = tweet?.full_text || tweet?.text || '';
+            var likes = parseInt(tweet?.favorite_count) || 0;
+            var retweets = parseInt(tweet?.retweet_count) || 0;
+            var id = tweet?.id_str || tweet?.id;
+            
+            // Check if within last 2 years
+            var tweetDateStr = null;
+            if (createdAt) {
+              var date = new Date(createdAt);
+              tweetDateStr = date.toISOString().slice(0, 7);
+            }
+            var isRecent = !tweetDateStr || tweetDateStr >= cutoffDate;
+            
+            // Track replies (only recent)
+            if (replyTo && isRecent) {
+              var handle = replyTo.toLowerCase();
+              replyCounts[handle] = (replyCounts[handle] || 0) + 1;
+              // Track most recent engagement date
+              if (tweetDateStr) {
+                if (!lastEngagedDates[handle] || tweetDateStr > lastEngagedDates[handle]) {
+                  lastEngagedDates[handle] = tweetDateStr;
+                }
+              }
+            }
+            
+            // Track mentions (only recent)
+            if (isRecent) {
+              var mentions = tweet?.entities?.user_mentions || [];
+              mentions.forEach(function(m) {
+                if (m.screen_name) {
+                  var mHandle = m.screen_name.toLowerCase();
+                  mentionCounts[mHandle] = (mentionCounts[mHandle] || 0) + 1;
+                  if (tweetDateStr) {
+                    if (!mentionDates[mHandle] || tweetDateStr > mentionDates[mHandle]) {
+                      mentionDates[mHandle] = tweetDateStr;
+                    }
+                  }
+                }
+              });
+            }
+            
+            // Collect tweets for top tweets (exclude pure retweets, only recent)
+            if (!text.startsWith('RT @') && isRecent) {
+              allTweets.push({
+                id: id,
+                text: text,
+                likes: likes,
+                retweets: retweets,
+                score: likes + retweets,
+                date: createdAt,
+                isReply: !!replyTo
+              });
+            }
+          });
+        }
+        
+        // Sort tweets by score
+        allTweets.sort(function(a, b) { return b.score - a.score; });
+        
+        // Build mentions list
+        allMentions = Object.keys(mentionCounts).map(function(handle) {
+          return {
+            handle: handle,
+            mentions: mentionCounts[handle],
+            replies: replyCounts[handle] || 0,
+            lastMentioned: mentionDates[handle] || null
+          };
+        });
+        allMentions.sort(function(a, b) { return b.mentions - a.mentions; });
+
+        progress.style.width = '90%';
+        status.textContent = 'Building report...';
+
+        // Build accounts list
+        allAccounts = following.map(function(handle) {
+          var h = handle.toLowerCase();
+          var likes = likeCounts[h] || 0;
+          var replies = replyCounts[h] || 0;
+          return {
+            handle: handle,
+            name: handle,
+            followsBack: followerSet.has(handle),
+            followedSince: null,
+            engagements: likes + replies,
+            likes: likes,
+            replies: replies,
+            lastEngaged: lastEngagedDates[h] || null
+          };
+        });
+
+        progress.style.width = '100%';
+        status.textContent = 'Complete!';
+
+        await new Promise(function(r) { setTimeout(r, 500); });
+
+        // Setup results
+        var deadAccounts = allAccounts.filter(function(a) { return a.engagements === 0; });
+        var engagedAccounts = allAccounts.filter(function(a) { return a.engagements > 0; });
+
+        // Update counts
+        document.getElementById('deadCount').textContent = deadAccounts.length;
+        document.getElementById('peopleCount').textContent = engagedAccounts.length;
+        document.getElementById('totalDeadCount').textContent = deadAccounts.length;
+        document.getElementById('totalPeopleCount').textContent = engagedAccounts.length;
+        document.getElementById('topTweetsCount2').textContent = Math.min(allTweets.length, 50);
+        document.getElementById('mentionsCount2').textContent = allMentions.length;
+
+        // Switch to results page
+        document.getElementById('page1').classList.remove('active');
+        document.getElementById('page2').classList.add('active');
+        
+        showResultsOrListSetup();
+
+        renderDeadList();
+        renderPeopleList();
+        renderTopTweets();
+        renderMentionsList();
+
+      } catch (err) {
+        console.error('Error processing archive:', err);
+        status.textContent = 'Error: ' + err.message;
+        progress.style.background = 'var(--danger)';
+      }
+    }
+
+    // Helper to parse Twitter's JS format (window.YTD.xxx.part0 = [...])
+    function parseTwitterJS(content) {
+      try {
+        // Remove the window.YTD.xxx.part0 = prefix
+        var jsonStart = content.indexOf('[');
+        var jsonEnd = content.lastIndexOf(']') + 1;
+        var jsonStr = content.slice(jsonStart, jsonEnd);
+        return JSON.parse(jsonStr);
+      } catch (e) {
+        console.error('Parse error:', e);
+        return [];
+      }
+    }
+
+    // Helper to load script dynamically
+    function loadScript(src) {
+      return new Promise(function(resolve, reject) {
+        var script = document.createElement('script');
+        script.src = src;
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+    }
+
+    // Generate consistent gradient for avatar based on handle
+    function getAvatarGradient(handle) {
+      var gradients = [
+        'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+        'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+        'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+        'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+        'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+        'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
+        'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
+        'linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%)',
+        'linear-gradient(135deg, #cd9cf2 0%, #f6f3ff 100%)',
+        'linear-gradient(135deg, #37ecba 0%, #72afd3 100%)',
+        'linear-gradient(135deg, #c471f5 0%, #fa71cd 100%)'
+      ];
+      var hash = 0;
+      for (var i = 0; i < handle.length; i++) {
+        hash = handle.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      return gradients[Math.abs(hash) % gradients.length];
+    }
+
+    // State
+    var currentTab = 'people';
+    var deadSort = { field: 'lastEngaged', direction: 'desc' };
+    var peopleSort = { field: 'engagements', direction: 'desc' };
+    var deadFilter = 'zero';
+    var peopleFilter = 'all';
+
+    // Tab switching
+    document.querySelectorAll('.main-tab').forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        currentTab = this.dataset.tab;
+        document.querySelectorAll('.main-tab').forEach(function(t) {
+          t.classList.remove('active');
+          t.style.borderBottomColor = 'transparent';
+          t.style.color = 'var(--gray)';
+        });
+        this.classList.add('active');
+        this.style.borderBottomColor = currentTab === 'dead' ? 'var(--danger)' : 'var(--success)';
+        this.style.color = 'var(--cream)';
+        
+        document.getElementById('deadSection').style.display = currentTab === 'dead' ? 'block' : 'none';
+        document.getElementById('peopleSection').style.display = currentTab === 'people' ? 'block' : 'none';
+      });
+    });
+
+    function renderDeadList() {
+      var filtered;
+      
+      if (deadFilter === 'zero') {
+        filtered = allAccounts.filter(function(a) { return a.engagements === 0; });
+      } else if (deadFilter === 'noFollowBack') {
+        filtered = allAccounts.filter(function(a) { return !a.followsBack; });
+      } else {
+        filtered = allAccounts.slice();
+      }
+
+      var search = document.getElementById('searchInputDead').value.toLowerCase();
+      if (search) {
+        filtered = filtered.filter(function(a) {
+          return a.handle.toLowerCase().indexOf(search) !== -1 || 
+                 a.name.toLowerCase().indexOf(search) !== -1;
+        });
+      }
+
+      filtered.sort(function(a, b) {
+        var aVal, bVal, field = deadSort.field;
+        if (field === 'name') { aVal = a.name.toLowerCase(); bVal = b.name.toLowerCase(); }
+        else if (field === 'followsBack') { aVal = a.followsBack ? 1 : 0; bVal = b.followsBack ? 1 : 0; }
+        else if (field === 'lastEngaged') { aVal = a.lastEngaged || '0000-00'; bVal = b.lastEngaged || '0000-00'; }
+        else if (field === 'engagements') { aVal = a.engagements; bVal = b.engagements; }
+        else if (field === 'likes') { aVal = a.likes; bVal = b.likes; }
+        else if (field === 'replies') { aVal = a.replies; bVal = b.replies; }
+        else return 0;
+        if (aVal < bVal) return deadSort.direction === 'asc' ? -1 : 1;
+        if (aVal > bVal) return deadSort.direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+
+      var list = document.getElementById('deadList');
+      var html = '';
+      for (var i = 0; i < filtered.length; i++) {
+        var a = filtered[i];
+        var lastEng = a.lastEngaged ? a.lastEngaged.replace('-', '/') : 'Never';
+        var lastEngClass = a.lastEngaged ? '' : 'color: var(--danger);';
+        var mutual = a.followsBack ? '<span style="color:var(--success)">✓</span>' : '—';
+        var engColor = a.engagements === 0 ? 'var(--danger)' : 'var(--cream)';
+        
+        html += '<div class="table-row">' +
+          '<div class="cell cell-check"><input type="checkbox" class="done-checkbox done-checkbox-dead" data-handle="' + a.handle + '"></div>' +
+          '<div class="cell cell-account"><div class="avatar" style="background:' + getAvatarGradient(a.handle) + '; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:14px;">' + a.handle.charAt(0).toUpperCase() + '</div><div class="account-info"><strong>' + a.name + '</strong><span>@' + a.handle + '</span></div></div>' +
+          '<div class="cell cell-mutual">' + mutual + '</div>' +
+          '<div class="cell cell-date" style="' + lastEngClass + '">' + lastEng + '</div>' +
+          '<div class="cell cell-num" style="color:var(--gray)">' + a.likes + '</div>' +
+          '<div class="cell cell-num" style="color:var(--gray)">' + a.replies + '</div>' +
+          '<div class="cell cell-num" style="color:' + engColor + ';font-weight:600">' + a.engagements + '</div>' +
+          '<div class="cell cell-action"><a href="https://x.com/' + a.handle + '" target="_blank" class="action-link">Visit</a></div>' +
+          '</div>';
+      }
+      list.innerHTML = html;
+
+      document.getElementById('totalDeadCount').textContent = filtered.length;
+      document.getElementById('selectAllDead').checked = false;
+    }
+
+    function renderPeopleList() {
+      var filtered;
+      
+      if (peopleFilter === 'mutual') {
+        filtered = allAccounts.filter(function(a) { return a.engagements > 0 && a.followsBack; });
+      } else {
+        filtered = allAccounts.filter(function(a) { return a.engagements > 0; });
+      }
+
+      var search = document.getElementById('searchInputPeople').value.toLowerCase();
+      if (search) {
+        filtered = filtered.filter(function(a) {
+          return a.handle.toLowerCase().indexOf(search) !== -1 || 
+                 a.name.toLowerCase().indexOf(search) !== -1;
+        });
+      }
+
+      filtered.sort(function(a, b) {
+        var aVal, bVal, field = peopleSort.field;
+        if (field === 'name') { aVal = a.name.toLowerCase(); bVal = b.name.toLowerCase(); }
+        else if (field === 'followsBack') { aVal = a.followsBack ? 1 : 0; bVal = b.followsBack ? 1 : 0; }
+        else if (field === 'lastEngaged') { aVal = a.lastEngaged || '0000-00'; bVal = b.lastEngaged || '0000-00'; }
+        else if (field === 'engagements') { aVal = a.engagements; bVal = b.engagements; }
+        else if (field === 'likes') { aVal = a.likes; bVal = b.likes; }
+        else if (field === 'replies') { aVal = a.replies; bVal = b.replies; }
+        else return 0;
+        if (aVal < bVal) return peopleSort.direction === 'asc' ? -1 : 1;
+        if (aVal > bVal) return peopleSort.direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+
+      var list = document.getElementById('peopleList');
+      var html = '';
+      for (var i = 0; i < filtered.length; i++) {
+        var a = filtered[i];
+        var mutual = a.followsBack ? '<span style="color:var(--success)">✓</span>' : '—';
+        var lastEng = a.lastEngaged ? a.lastEngaged.replace('-', '/') : '—';
+        
+        html += '<div class="table-row">' +
+          '<div class="cell cell-check"><input type="checkbox" class="done-checkbox done-checkbox-people" data-handle="' + a.handle + '"></div>' +
+          '<div class="cell cell-account"><div class="avatar" style="background:' + getAvatarGradient(a.handle) + '; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:14px;">' + a.handle.charAt(0).toUpperCase() + '</div><div class="account-info"><strong>' + a.name + '</strong><span>@' + a.handle + '</span></div></div>' +
+          '<div class="cell cell-mutual">' + mutual + '</div>' +
+          '<div class="cell cell-date">' + lastEng + '</div>' +
+          '<div class="cell cell-num" style="color:var(--success);font-weight:600">' + a.engagements + '</div>' +
+          '<div class="cell cell-num">' + a.likes + '</div>' +
+          '<div class="cell cell-num">' + a.replies + '</div>' +
+          '<div class="cell cell-action"><a href="https://x.com/' + a.handle + '" target="_blank" class="action-link action-link-success">Visit</a></div>' +
+          '</div>';
+      }
+      list.innerHTML = html;
+
+      document.getElementById('totalPeopleCount').textContent = filtered.length;
+      document.getElementById('selectAllPeople').checked = false;
+    }
+
+    // Tweets filter state
+    var tweetsFilter = 'all';
+    var tweetsSearch = '';
+
+    function renderTopTweets() {
+      var filtered = allTweets.slice();
+      
+      if (tweetsFilter === 'original') {
+        filtered = filtered.filter(function(t) { return !t.isReply; });
+      } else if (tweetsFilter === 'replies') {
+        filtered = filtered.filter(function(t) { return t.isReply; });
+      }
+
+      var search = document.getElementById('searchInputTweets').value.toLowerCase();
+      if (search) {
+        filtered = filtered.filter(function(t) {
+          return t.text.toLowerCase().indexOf(search) !== -1;
+        });
+      }
+
+      // Already sorted by score (likes + RTs) descending
+      var list = document.getElementById('topTweetsList');
+      var html = '';
+      
+      // Show top 50
+      var toShow = filtered.slice(0, 50);
+      
+      for (var i = 0; i < toShow.length; i++) {
+        var t = toShow[i];
+        var dateStr = t.date ? new Date(t.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+        var displayText = t.text.replace(/https?:\/\/t\.co\/\w+/g, function(url) {
+          return '<a href="' + url + '" target="_blank">' + url + '</a>';
+        });
+        
+        html += '<div class="tweet-card">' +
+          '<div class="tweet-header">' +
+            '<span style="font-size:12px;color:var(--gray);">#' + (i + 1) + '</span>' +
+            (t.isReply ? '<span style="font-size:11px;color:var(--green);background:rgba(34,211,238,0.15);padding:2px 8px;border-radius:4px;">Reply</span>' : '') +
+            '<span class="tweet-date">' + dateStr + '</span>' +
+          '</div>' +
+          '<div class="tweet-text">' + displayText + '</div>' +
+          '<div class="tweet-stats">' +
+            '<div class="tweet-stat">❤️ <span>' + t.likes + '</span></div>' +
+            '<div class="tweet-stat">🔁 <span>' + t.retweets + '</span></div>' +
+            '<div class="tweet-link"><a href="https://x.com/i/status/' + t.id + '" target="_blank">View →</a></div>' +
+          '</div>' +
+        '</div>';
+      }
+      
+      if (toShow.length === 0) {
+        html = '<div style="text-align:center;padding:40px;color:var(--gray);">No tweets found</div>';
+      }
+      
+      list.innerHTML = html;
+    }
+
+    // Mentions sort state
+    var mentionsSort = { field: 'mentions', direction: 'desc' };
+
+    function renderMentionsList() {
+      var filtered = allMentions.slice();
+
+      var search = document.getElementById('searchInputMentions').value.toLowerCase();
+      if (search) {
+        filtered = filtered.filter(function(m) {
+          return m.handle.toLowerCase().indexOf(search) !== -1;
+        });
+      }
+
+      filtered.sort(function(a, b) {
+        var aVal, bVal, field = mentionsSort.field;
+        if (field === 'mentions') { aVal = a.mentions; bVal = b.mentions; }
+        else if (field === 'replies') { aVal = a.replies; bVal = b.replies; }
+        else if (field === 'lastMentioned') { aVal = a.lastMentioned || '0000-00'; bVal = b.lastMentioned || '0000-00'; }
+        else return 0;
+        if (aVal < bVal) return mentionsSort.direction === 'asc' ? -1 : 1;
+        if (aVal > bVal) return mentionsSort.direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+
+      var list = document.getElementById('mentionsList');
+      var html = '';
+      
+      for (var i = 0; i < filtered.length; i++) {
+        var m = filtered[i];
+        var lastMen = m.lastMentioned ? m.lastMentioned.replace('-', '/') : '—';
+        
+        html += '<div class="table-row">' +
+          '<div class="cell cell-account"><a href="https://x.com/' + m.handle + '" target="_blank" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;"><div class="avatar" style="background:' + getAvatarGradient(m.handle) + '; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:14px;">' + m.handle.charAt(0).toUpperCase() + '</div><div class="account-info"><strong>@' + m.handle + '</strong></div></a></div>' +
+          '<div class="cell cell-num" style="color:var(--green);font-weight:600">' + m.mentions + '</div>' +
+          '<div class="cell cell-num">' + m.replies + '</div>' +
+          '<div class="cell cell-date">' + lastMen + '</div>' +
+        '</div>';
+      }
+      
+      if (filtered.length === 0) {
+        html = '<div style="text-align:center;padding:40px;color:var(--gray);">No mentions found</div>';
+      }
+      
+      list.innerHTML = html;
+    }
+
+    // Filter tabs for dead section
+    document.getElementById('filterTabsDead').addEventListener('click', function(e) {
+      if (e.target.classList.contains('filter-tab')) {
+        this.querySelectorAll('.filter-tab').forEach(function(t) { t.classList.remove('active'); });
+        e.target.classList.add('active');
+        deadFilter = e.target.dataset.filter;
+        renderDeadList();
+      }
+    });
+
+    // Filter tabs for people section
+    document.getElementById('filterTabsPeople').addEventListener('click', function(e) {
+      if (e.target.classList.contains('filter-tab')) {
+        this.querySelectorAll('.filter-tab').forEach(function(t) { t.classList.remove('active'); });
+        e.target.classList.add('active');
+        peopleFilter = e.target.dataset.filter;
+        renderPeopleList();
+      }
+    });
+
+    // Filter tabs for tweets section
+    document.getElementById('filterTabsTweets').addEventListener('click', function(e) {
+      if (e.target.classList.contains('filter-tab')) {
+        this.querySelectorAll('.filter-tab').forEach(function(t) { t.classList.remove('active'); });
+        e.target.classList.add('active');
+        tweetsFilter = e.target.dataset.filter;
+        renderTopTweets();
+      }
+    });
+
+    // Search for tweets
+    document.getElementById('searchInputTweets').addEventListener('input', function() {
+      renderTopTweets();
+    });
+
+    // Search for mentions
+    document.getElementById('searchInputMentions').addEventListener('input', function() {
+      renderMentionsList();
+    });
+
+    // Column header sorting for mentions table
+    document.getElementById('mentionsTableHeader').addEventListener('click', function(e) {
+      var th = e.target.closest('.th.sortable');
+      if (!th) return;
+      
+      var field = th.dataset.sort;
+      if (mentionsSort.field === field) {
+        mentionsSort.direction = mentionsSort.direction === 'asc' ? 'desc' : 'asc';
+      } else {
+        mentionsSort.field = field;
+        mentionsSort.direction = 'desc';
+      }
+      
+      // Update header UI
+      this.querySelectorAll('.th.sortable').forEach(function(t) {
+        t.classList.remove('active-sort', 'asc', 'desc');
+        t.textContent = t.textContent.replace(' ↑', '').replace(' ↓', '');
+      });
+      th.classList.add('active-sort', mentionsSort.direction);
+      th.textContent += mentionsSort.direction === 'asc' ? ' ↑' : ' ↓';
+      
+      renderMentionsList();
+    });
+
+    // Column header sorting for dead table
+    document.getElementById('deadTableHeader').addEventListener('click', function(e) {
+      var th = e.target.closest('.th.sortable');
+      if (!th) return;
+      
+      var field = th.dataset.sort;
+      if (deadSort.field === field) {
+        deadSort.direction = deadSort.direction === 'asc' ? 'desc' : 'asc';
+      } else {
+        deadSort.field = field;
+        deadSort.direction = 'asc';
+      }
+      
+      // Update header UI
+      this.querySelectorAll('.th.sortable').forEach(function(t) {
+        t.classList.remove('active-sort', 'asc', 'desc');
+        t.textContent = t.textContent.replace(' ↑', '').replace(' ↓', '');
+      });
+      th.classList.add('active-sort', deadSort.direction);
+      th.textContent += deadSort.direction === 'asc' ? ' ↑' : ' ↓';
+      
+      renderDeadList();
+    });
+
+    // Column header sorting for people table
+    document.getElementById('peopleTableHeader').addEventListener('click', function(e) {
+      var th = e.target.closest('.th.sortable');
+      if (!th) return;
+      
+      var field = th.dataset.sort;
+      if (peopleSort.field === field) {
+        peopleSort.direction = peopleSort.direction === 'asc' ? 'desc' : 'asc';
+      } else {
+        peopleSort.field = field;
+        peopleSort.direction = 'desc'; // Default to desc for people (highest first)
+      }
+      
+      // Update header UI
+      this.querySelectorAll('.th.sortable').forEach(function(t) {
+        t.classList.remove('active-sort', 'asc', 'desc');
+        t.textContent = t.textContent.replace(' ↑', '').replace(' ↓', '');
+      });
+      th.classList.add('active-sort', peopleSort.direction);
+      th.textContent += peopleSort.direction === 'asc' ? ' ↑' : ' ↓';
+      
+      renderPeopleList();
+    });
+
+    // Search handlers
+    document.getElementById('searchInputDead').addEventListener('input', renderDeadList);
+    document.getElementById('searchInputPeople').addEventListener('input', renderPeopleList);
+
+    // Helper function for clipboard with fallback
+    function copyToClipboard(text) {
+      return new Promise(function(resolve, reject) {
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(text).then(resolve).catch(function() {
+            fallbackCopy(text, resolve, reject);
+          });
+        } else {
+          fallbackCopy(text, resolve, reject);
+        }
+      });
+      
+      function fallbackCopy(text, resolve, reject) {
+        var textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-9999px';
+        textArea.style.top = '0';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+          var success = document.execCommand('copy');
+          document.body.removeChild(textArea);
+          if (success) resolve();
+          else reject(new Error('execCommand failed'));
+        } catch (e) {
+          document.body.removeChild(textArea);
+          reject(e);
+        }
+      }
+    }
+
+    // Copy dead weight handles (selected only)
+    document.getElementById('copyDeadBtn').addEventListener('click', function() {
+      var btn = this;
+      var handles = [];
+      document.querySelectorAll('.done-checkbox-dead:checked').forEach(function(cb) {
+        handles.push('@' + cb.dataset.handle);
+      });
+      
+      if (handles.length === 0) {
+        btn.textContent = 'Select some first';
+        setTimeout(function() { btn.textContent = 'Copy handles'; }, 2000);
+        return;
+      }
+      
+      copyToClipboard(handles.join('\n')).then(function() {
+        btn.textContent = '✓ Copied ' + handles.length;
+        setTimeout(function() { btn.textContent = 'Copy handles'; }, 2000);
+      }).catch(function() {
+        prompt('Copy these handles:', handles.join('\n'));
+      });
+    });
+
+    // Copy people handles (selected only)
+    document.getElementById('copyPeopleBtn').addEventListener('click', function() {
+      var btn = this;
+      var handles = [];
+      document.querySelectorAll('.done-checkbox-people:checked').forEach(function(cb) {
+        handles.push('@' + cb.dataset.handle);
+      });
+      
+      if (handles.length === 0) {
+        btn.textContent = 'Select some first';
+        setTimeout(function() { btn.textContent = 'Copy handles'; }, 2000);
+        return;
+      }
+      
+      copyToClipboard(handles.join('\n')).then(function() {
+        btn.textContent = '✓ Copied ' + handles.length;
+        setTimeout(function() { btn.textContent = 'Copy handles'; }, 2000);
+      }).catch(function() {
+        prompt('Copy these handles:', handles.join('\n'));
+      });
+    });
+
+    // Select all dead weight
+    document.getElementById('selectAllDead').addEventListener('change', function() {
+      var checked = this.checked;
+      document.querySelectorAll('.done-checkbox-dead').forEach(function(cb) {
+        cb.checked = checked;
+      });
+    });
+
+    // Select all people
+    document.getElementById('selectAllPeople').addEventListener('change', function() {
+      var checked = this.checked;
+      document.querySelectorAll('.done-checkbox-people').forEach(function(cb) {
+        cb.checked = checked;
+      });
+    });
+
+    // Extension CTA button
+    document.getElementById('getExtensionBtn').addEventListener('click', function() {
+      window.open('extension.html', '_blank');
+    });
+
+    // Copy tip address
     document.getElementById('copyTipBtn').addEventListener('click', function() {
       var btn = this;
       var address = document.getElementById('tipAddress').textContent;
-      navigator.clipboard.writeText(address).then(function() {
+      copyToClipboard(address).then(function() {
         btn.textContent = '✓ Copied';
         setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
       });
+    });
+
+    // Simple results display
+    function showResultsOrListSetup() {
+      var resultsSection = document.getElementById('resultsSection');
+      if (resultsSection) {
+        resultsSection.style.display = 'block';
+      }
+    }
+
+    // Logo click - go home
+    document.getElementById('logoBtn').addEventListener('click', function() {
+      location.reload();
+    });
+
+    // Change archive - go back to upload
+    document.getElementById('changeArchiveBtn').addEventListener('click', function() {
+      document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+      document.getElementById('page1').classList.add('active');
+      // Reset processing UI
+      document.getElementById('processingInfo').classList.remove('active');
+      document.getElementById('uploadProgress').style.width = '0%';
     });
   </script>
 </body>
