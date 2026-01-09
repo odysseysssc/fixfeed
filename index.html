@@ -1117,25 +1117,45 @@
 
         allTweets.sort(function(a, b) { return b.score - a.score; });
 
-        // Build accounts list
+        // Build accounts list from following data
+        // New X format uses user IDs, not handles
         allAccounts = [];
         followingData.forEach(function(f) {
-          var handle = f.following?.userLink?.split('/').pop()?.toLowerCase();
-          var name = f.following?.userLink?.split('/').pop() || handle;
+          var userLink = f.following?.userLink || '';
+          var accountId = f.following?.accountId || '';
           
-          if (handle) {
-            var likes = likeCounts[handle] || 0;
-            var replies = replyCounts[handle] || 0;
-            var lastLike = lastLikeDates[handle];
-            var lastReply = lastReplyDates[handle];
+          // Check if old format (has username) or new format (has user_id)
+          var handle = null;
+          var userId = null;
+          var profileUrl = null;
+          
+          if (userLink.includes('user_id=')) {
+            // New format - extract user ID
+            userId = userLink.match(/user_id=(\d+)/)?.[1] || accountId;
+            profileUrl = 'https://twitter.com/intent/user?user_id=' + userId;
+            handle = 'user_id=' + userId; // Use as identifier
+          } else {
+            // Old format - extract handle
+            handle = userLink.split('/').pop()?.toLowerCase();
+            profileUrl = 'https://x.com/' + handle;
+          }
+          
+          if (handle || userId) {
+            var identifier = handle || ('user_id=' + userId);
+            var likes = likeCounts[identifier] || likeCounts[handle] || 0;
+            var replies = replyCounts[identifier] || replyCounts[handle] || 0;
+            var lastLike = lastLikeDates[identifier] || lastLikeDates[handle];
+            var lastReply = lastReplyDates[identifier] || lastReplyDates[handle];
             var lastEngaged = null;
             if (lastLike && lastReply) lastEngaged = lastLike > lastReply ? lastLike : lastReply;
             else lastEngaged = lastLike || lastReply;
 
             allAccounts.push({
-              handle: handle,
-              name: name,
-              followsBack: followerHandles.has(handle),
+              handle: identifier,
+              userId: userId,
+              name: userId ? ('ID: ' + userId.slice(-8)) : handle,
+              profileUrl: profileUrl,
+              followsBack: followerHandles.has(identifier) || followerHandles.has(handle),
               likes: likes,
               replies: replies,
               engagements: likes + replies,
@@ -1143,8 +1163,65 @@
             });
           }
         });
+        
+        // Build "Your People" from engagement data (handles we actually have)
+        var engagedPeople = [];
+        var seenHandles = new Set();
+        
+        // Add from replies
+        Object.keys(replyCounts).forEach(function(handle) {
+          if (!seenHandles.has(handle) && !handle.startsWith('user_id=')) {
+            seenHandles.add(handle);
+            var likes = likeCounts[handle] || 0;
+            var replies = replyCounts[handle] || 0;
+            var lastLike = lastLikeDates[handle];
+            var lastReply = lastReplyDates[handle];
+            var lastEngaged = null;
+            if (lastLike && lastReply) lastEngaged = lastLike > lastReply ? lastLike : lastReply;
+            else lastEngaged = lastLike || lastReply;
+            
+            engagedPeople.push({
+              handle: handle,
+              name: handle,
+              profileUrl: 'https://x.com/' + handle,
+              likes: likes,
+              replies: replies,
+              engagements: likes + replies,
+              lastEngaged: lastEngaged
+            });
+          }
+        });
+        
+        // Add from likes (only if not already added)
+        Object.keys(likeCounts).forEach(function(handle) {
+          if (!seenHandles.has(handle) && !handle.startsWith('user_id=')) {
+            seenHandles.add(handle);
+            var likes = likeCounts[handle] || 0;
+            var replies = replyCounts[handle] || 0;
+            var lastLike = lastLikeDates[handle];
+            var lastReply = lastReplyDates[handle];
+            var lastEngaged = null;
+            if (lastLike && lastReply) lastEngaged = lastLike > lastReply ? lastLike : lastReply;
+            else lastEngaged = lastLike || lastReply;
+            
+            engagedPeople.push({
+              handle: handle,
+              name: handle,
+              profileUrl: 'https://x.com/' + handle,
+              likes: likes,
+              replies: replies,
+              engagements: likes + replies,
+              lastEngaged: lastEngaged
+            });
+          }
+        });
+        
+        engagedPeople.sort(function(a, b) { return b.engagements - a.engagements; });
 
         allAccounts.sort(function(a, b) { return b.engagements - a.engagements; });
+        
+        // Store engagedPeople globally for rendering
+        window.engagedPeople = engagedPeople;
 
         progress.style.width = '100%';
         status.textContent = 'Complete!';
@@ -1152,12 +1229,11 @@
         await new Promise(function(r) { setTimeout(r, 500); });
 
         var deadAccounts = allAccounts.filter(function(a) { return a.engagements === 0; });
-        var engagedAccounts = allAccounts.filter(function(a) { return a.engagements > 0; });
 
         document.getElementById('deadCount').textContent = deadAccounts.length;
-        document.getElementById('peopleCount').textContent = engagedAccounts.length;
+        document.getElementById('peopleCount').textContent = engagedPeople.length;
         document.getElementById('totalDeadCount').textContent = deadAccounts.length;
-        document.getElementById('totalPeopleCount').textContent = engagedAccounts.length;
+        document.getElementById('totalPeopleCount').textContent = engagedPeople.length;
         document.getElementById('topTweetsCount2').textContent = Math.min(allTweets.length, 50);
         document.getElementById('mentionsCount2').textContent = allMentions.length;
 
@@ -1794,17 +1870,20 @@
         var lastEng = a.lastEngaged ? a.lastEngaged.replace('-', '/') : 'Never';
         var lastEngClass = a.lastEngaged ? '' : 'color: var(--danger);';
         var mutual = a.followsBack ? '<span style="color:var(--success)">✓</span>' : '—';
-        var engColor = a.engagements === 0 ? 'var(--danger)' : 'var(--cream)';
+        var engColor = a.engagements === 0 ? 'var(--danger)' : 'var(--dark)';
+        var displayName = a.userId ? ('ID: ...' + a.userId.slice(-6)) : a.name;
+        var displayHandle = a.userId ? a.userId : a.handle;
+        var profileUrl = a.profileUrl || ('https://x.com/' + a.handle);
         
         html += '<div class="table-row">' +
-          '<div class="cell cell-check"><input type="checkbox" class="done-checkbox done-checkbox-dead" data-handle="' + a.handle + '"></div>' +
-          '<div class="cell cell-account"><div class="avatar" style="background:' + getAvatarGradient(a.handle) + '; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:14px;">' + a.handle.charAt(0).toUpperCase() + '</div><div class="account-info"><strong>' + a.name + '</strong><span>@' + a.handle + '</span></div></div>' +
+          '<div class="cell cell-check"><input type="checkbox" class="done-checkbox done-checkbox-dead" data-handle="' + (a.profileUrl || a.handle) + '"></div>' +
+          '<div class="cell cell-account"><div class="avatar" style="background:' + getAvatarGradient(a.handle) + '; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:14px;">' + displayName.charAt(0).toUpperCase() + '</div><div class="account-info"><strong>' + displayName + '</strong><span style="font-size:11px;opacity:0.7;">' + (a.userId ? 'user_id' : '@' + a.handle) + '</span></div></div>' +
           '<div class="cell cell-mutual">' + mutual + '</div>' +
           '<div class="cell cell-date" style="' + lastEngClass + '">' + lastEng + '</div>' +
           '<div class="cell cell-num" style="color:var(--gray)">' + a.likes + '</div>' +
           '<div class="cell cell-num" style="color:var(--gray)">' + a.replies + '</div>' +
           '<div class="cell cell-num" style="color:' + engColor + ';font-weight:600">' + a.engagements + '</div>' +
-          '<div class="cell cell-action"><a href="https://x.com/' + a.handle + '" target="_blank" class="action-link">Visit</a></div>' +
+          '<div class="cell cell-action"><a href="' + profileUrl + '" target="_blank" class="action-link">Visit</a></div>' +
           '</div>';
       }
       list.innerHTML = html;
@@ -1814,12 +1893,11 @@
     }
 
     function renderPeopleList() {
-      var filtered;
+      var engagedPeople = window.engagedPeople || [];
+      var filtered = engagedPeople.slice();
       
       if (peopleFilter === 'mutual') {
-        filtered = allAccounts.filter(function(a) { return a.engagements > 0 && a.followsBack; });
-      } else {
-        filtered = allAccounts.filter(function(a) { return a.engagements > 0; });
+        filtered = filtered.filter(function(a) { return a.followsBack; });
       }
 
       var search = document.getElementById('searchInputPeople').value.toLowerCase();
@@ -1848,18 +1926,17 @@
       var html = '';
       for (var i = 0; i < filtered.length; i++) {
         var a = filtered[i];
-        var mutual = a.followsBack ? '<span style="color:var(--success)">✓</span>' : '—';
         var lastEng = a.lastEngaged ? a.lastEngaged.replace('-', '/') : '—';
+        var profileUrl = a.profileUrl || ('https://x.com/' + a.handle);
         
         html += '<div class="table-row">' +
           '<div class="cell cell-check"><input type="checkbox" class="done-checkbox done-checkbox-people" data-handle="' + a.handle + '"></div>' +
-          '<div class="cell cell-account"><div class="avatar" style="background:' + getAvatarGradient(a.handle) + '; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:14px;">' + a.handle.charAt(0).toUpperCase() + '</div><div class="account-info"><strong>' + a.name + '</strong><span>@' + a.handle + '</span></div></div>' +
-          '<div class="cell cell-mutual">' + mutual + '</div>' +
+          '<div class="cell cell-account"><div class="avatar" style="background:' + getAvatarGradient(a.handle) + '; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:14px;">' + a.handle.charAt(0).toUpperCase() + '</div><div class="account-info"><strong>@' + a.handle + '</strong><span style="font-size:11px;opacity:0.7;">' + a.engagements + ' engagements</span></div></div>' +
           '<div class="cell cell-date">' + lastEng + '</div>' +
           '<div class="cell cell-num" style="color:var(--success);font-weight:600">' + a.engagements + '</div>' +
           '<div class="cell cell-num">' + a.likes + '</div>' +
           '<div class="cell cell-num">' + a.replies + '</div>' +
-          '<div class="cell cell-action"><a href="https://x.com/' + a.handle + '" target="_blank" class="action-link action-link-success">Visit</a></div>' +
+          '<div class="cell cell-action"><a href="' + profileUrl + '" target="_blank" class="action-link action-link-success">Visit</a></div>' +
           '</div>';
       }
       list.innerHTML = html;
