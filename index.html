@@ -2076,16 +2076,6 @@
       }
     });
 
-    // Filter tabs for people section
-    document.getElementById('filterTabsPeople').addEventListener('click', function(e) {
-      if (e.target.classList.contains('filter-tab')) {
-        this.querySelectorAll('.filter-tab').forEach(function(t) { t.classList.remove('active'); });
-        e.target.classList.add('active');
-        peopleFilter = e.target.dataset.filter;
-        renderPeopleList();
-      }
-    });
-
     // Filter tabs for tweets section
     document.getElementById('filterTabsTweets').addEventListener('click', function(e) {
       if (e.target.classList.contains('filter-tab')) {
