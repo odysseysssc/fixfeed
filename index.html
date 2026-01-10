@@ -83,7 +83,7 @@
       line-height: 1.1; letter-spacing: -2px; margin-bottom: 20px;
     }
     .hero h1 span { color: var(--green); }
-    .hero p { font-size: 16px; color: var(--gray); max-width: 460px; margin: 0 auto 40px; line-height: 1.6; }
+    .hero p { font-size: 16px; color: var(--gray); max-width: 500px; margin: 0 auto 40px; line-height: 1.6; }
 
     .handle-form { display: flex; gap: 12px; max-width: 400px; margin: 0 auto; }
     .input-wrapper { flex: 1; position: relative; }
@@ -489,26 +489,28 @@
     <!-- Page 1: Hero + Archive Request Combined -->
     <div class="page hero active" id="page1">
       <div class="container">
-        <h1>the X algo is <span>broken</span></h1>
-        <p>Your feed is full of irrelevant garbage from accounts you don't care about. The algo buries the good stuff. Time to take control. FREE</p>
+        <h1>fix your <span>X feed</span></h1>
+        <p>Cut through the noise. Your archive reveals who you actually engage with — curate them into a list, unfollow the rest. Better signal, better ratio, better reach.</p>
         
-        <div class="value-props" style="display: flex; gap: 48px; justify-content: center; margin: 40px 0; flex-wrap: wrap;">
-          <div style="text-align: center; max-width: 240px;">
-            <div style="font-size: 24px; margin-bottom: 8px;">⭐</div>
-            <div style="font-size: 14px; color: var(--dark); font-weight: 700; margin-bottom: 4px;">curate your people</div>
-            <div style="font-size: 13px; color: var(--gray);">Build a list of accounts you actually engage with. Pin it to your feed tabs and only see posts from them — no algo interference</div>
+        <div class="value-props" style="display: flex; gap: 32px; justify-content: center; margin: 40px 0; flex-wrap: wrap;">
+          <div style="background: var(--cream-dark); border-radius: 8px; padding: 24px; text-align: left; max-width: 280px; position: relative;">
+            <div style="position: absolute; top: -12px; left: 20px; background: var(--green); color: var(--cream); font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 4px;">STEP 1</div>
+            <div style="font-size: 24px; margin-bottom: 12px;">⭐</div>
+            <div style="font-size: 15px; color: var(--dark); font-weight: 700; margin-bottom: 8px;">Curate your people</div>
+            <div style="font-size: 13px; color: var(--gray); line-height: 1.5;">We analyze your archive to find accounts you actually engage with. Filter by engagement count, add them to an X list, pin it to your feed — pure signal, no algo.</div>
           </div>
-          <div style="text-align: center; max-width: 240px;">
-            <div style="font-size: 24px; margin-bottom: 8px;">💀</div>
-            <div style="font-size: 14px; color: var(--dark); font-weight: 700; margin-bottom: 4px;">cut the dead weight</div>
-            <div style="font-size: 13px; color: var(--gray);">Unfollow accounts you never engage with. Better ratio = algo favors you more. Less noise = better feed</div>
+          <div style="background: var(--cream-dark); border-radius: 8px; padding: 24px; text-align: left; max-width: 280px; position: relative;">
+            <div style="position: absolute; top: -12px; left: 20px; background: var(--danger); color: white; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 4px;">STEP 2</div>
+            <div style="font-size: 24px; margin-bottom: 12px;">🧹</div>
+            <div style="font-size: 15px; color: var(--dark); font-weight: 700; margin-bottom: 8px;">Clean up the rest</div>
+            <div style="font-size: 13px; color: var(--gray); line-height: 1.5;">Unfollow everyone NOT on your curated list. Better follower:following ratio = algo rewards you more. Less noise = better main feed when you want it.</div>
           </div>
         </div>
 
         <!-- Archive section -->
         <div style="max-width: 500px; margin: 0 auto;">
-          <h2 style="font-size: 20px; text-align: center; margin-bottom: 8px;">fix your feed</h2>
-          <p style="text-align: center; color: var(--gray); font-size: 14px; margin-bottom: 24px;">Upload your X archive and we'll show you exactly who to unfollow and who to curate <span style="opacity: 0.7;">(and some other insights)</span></p>
+          <h2 style="font-size: 20px; text-align: center; margin-bottom: 8px;">get started</h2>
+          <p style="text-align: center; color: var(--gray); font-size: 14px; margin-bottom: 24px;">Upload your X archive — we'll crunch the numbers and show you who matters</p>
           
           <!-- Upload zone -->
           <div class="upload-zone" id="uploadZone" style="margin-bottom: 16px;">
@@ -610,42 +612,46 @@
           
           <div style="display: grid; gap: 20px;">
             <div style="display: flex; gap: 16px; align-items: flex-start;">
-              <div style="font-size: 18px;">📊</div>
+              <div style="background: var(--green); color: var(--cream); min-width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700;">1</div>
               <div>
-                <strong style="font-size: 14px;">We analyze your actual engagement</strong>
-                <p style="color: var(--gray); font-size: 13px; margin-top: 4px;">Your archive contains every like, reply, and retweet. We crunch the data to show who you actually interact with vs who's just cluttering your feed.</p>
+                <strong style="font-size: 14px;">Upload your archive</strong>
+                <p style="color: var(--gray); font-size: 13px; margin-top: 4px;">Your archive contains every like, reply, and retweet. We analyze it locally in your browser — nothing leaves your device.</p>
               </div>
             </div>
             
             <div style="display: flex; gap: 16px; align-items: flex-start;">
-              <div style="font-size: 18px;">⭐</div>
+              <div style="background: var(--green); color: var(--cream); min-width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700;">2</div>
               <div>
-                <strong style="font-size: 14px;">Build your curated list</strong>
-                <p style="color: var(--gray); font-size: 13px; margin-top: 4px;">See who you actually engage with, ranked. Add them to an X list, then pin that list as a tab in your feed. Now you have a clean timeline with only posts from people you care about — the algo can't touch it.</p>
+                <strong style="font-size: 14px;">See who you actually engage with</strong>
+                <p style="color: var(--gray); font-size: 13px; margin-top: 4px;">Filter by engagement count (5+, 10+, 20+) to find your real community. These are the accounts worth keeping.</p>
               </div>
             </div>
             
             <div style="display: flex; gap: 16px; align-items: flex-start;">
-              <div style="font-size: 18px;">💀</div>
+              <div style="background: var(--green); color: var(--cream); min-width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700;">3</div>
               <div>
-                <strong style="font-size: 14px;">Unfollow the dead weight</strong>
-                <p style="color: var(--gray); font-size: 13px; margin-top: 4px;">Find accounts you follow but never engage with — zero likes, zero replies. Unfollowing them improves your follower ratio, which the algo actually rewards. Less noise, better reach.</p>
+                <strong style="font-size: 14px;">Curate them into a list</strong>
+                <p style="color: var(--gray); font-size: 13px; margin-top: 4px;">Use our free extension to bulk add your engaged accounts to an X list. Pin that list to your feed tabs for a clean, algo-free timeline.</p>
               </div>
             </div>
             
             <div style="display: flex; gap: 16px; align-items: flex-start;">
-              <div style="font-size: 18px;">⚡</div>
+              <div style="background: var(--danger); color: white; min-width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700;">4</div>
               <div>
-                <strong style="font-size: 14px;">Automate the boring stuff</strong>
-                <p style="color: var(--gray); font-size: 13px; margin-top: 4px;">Our free browser extension lets you bulk unfollow hundreds of accounts and mass add to lists. What would take hours takes minutes.</p>
+                <strong style="font-size: 14px;">Clean up the rest</strong>
+                <p style="color: var(--gray); font-size: 13px; margin-top: 4px;">The extension's "clean up" mode unfollows everyone NOT on your curated list. Better ratio = algo favors you. Less noise = better feed.</p>
               </div>
             </div>
           </div>
           
-          <p style="text-align: center; color: var(--gray); font-size: 13px; margin-top: 32px;">Completely free. No account needed. No catch.</p>
+          <div style="background: var(--green-dim); border-radius: 8px; padding: 16px; margin-top: 24px; text-align: center;">
+            <p style="color: var(--dark); font-size: 13px; margin: 0;">
+              <strong>100% free.</strong> No account needed. No catch. Your data never leaves your browser.
+            </p>
+          </div>
           
           <p style="text-align: center; margin-top: 24px;">
-            <a href="https://x.com/OdysseySSSC" target="_blank" style="color: var(--dark); text-decoration: none; font-size: 13px;">follow me on X <code style="background: var(--dark); color: var(--cream); padding: 4px 8px; border-radius: 2px; font-size: 12px;">@OdysseySSSC</code></a>
+            <a href="https://x.com/OdysseySSSC" target="_blank" style="color: var(--dark); text-decoration: none; font-size: 13px;">built by <code style="background: var(--dark); color: var(--cream); padding: 4px 8px; border-radius: 2px; font-size: 12px;">@OdysseySSSC</code></a>
           </p>
         </div>
       </div>
@@ -743,8 +749,19 @@
           <div id="peopleSection" class="tab-content">
             <p class="tab-desc">The accounts you actually care about. Add them to a list and never miss a post.</p>
             
-            <div class="table-controls">
-              <input type="text" class="search-input" id="searchInputPeople" placeholder="Search...">
+            <div class="table-controls" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+              <input type="text" class="search-input" id="searchInputPeople" placeholder="Search..." style="flex: 1; min-width: 150px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <label style="font-size: 12px; color: var(--gray); white-space: nowrap;">Min engagements:</label>
+                <select id="minEngagementFilter" style="padding: 8px 12px; border: 2px solid var(--cream-dark); border-radius: 4px; background: var(--cream); font-family: 'Space Mono', monospace; font-size: 12px;">
+                  <option value="1">1+</option>
+                  <option value="2">2+</option>
+                  <option value="3">3+</option>
+                  <option value="5" selected>5+</option>
+                  <option value="10">10+</option>
+                  <option value="20">20+</option>
+                </select>
+              </div>
             </div>
 
             <div class="sortable-table">
@@ -759,7 +776,7 @@
             </div>
 
             <div class="table-footer">
-              <span class="progress-text"><span id="totalPeopleCount">0</span> accounts</span>
+              <span class="progress-text"><span id="totalPeopleCount">0</span> accounts (of <span id="totalPeopleUnfiltered">0</span> total)</span>
               <div style="display: flex; align-items: center; gap: 12px;">
                 <span style="font-size: 12px; color: var(--gray);">Use with our free extension to add to a list →</span>
                 <button class="btn btn-secondary btn-sm" id="copyPeopleBtn">Copy handles</button>
@@ -1923,6 +1940,18 @@
     function renderPeopleList() {
       var engagedPeople = window.engagedPeople || [];
       var filtered = engagedPeople.slice();
+      
+      // Get minimum engagement filter
+      var minEngagementEl = document.getElementById('minEngagementFilter');
+      var minEngagement = minEngagementEl ? parseInt(minEngagementEl.value, 10) : 1;
+      
+      // Store unfiltered total
+      var unfilteredTotal = filtered.length;
+      
+      // Filter by minimum engagements
+      filtered = filtered.filter(function(a) {
+        return a.engagements >= minEngagement;
+      });
 
       var search = document.getElementById('searchInputPeople').value.toLowerCase();
       if (search) {
@@ -1961,6 +1990,8 @@
       list.innerHTML = html;
 
       document.getElementById('totalPeopleCount').textContent = filtered.length;
+      var unfilteredEl = document.getElementById('totalPeopleUnfiltered');
+      if (unfilteredEl) unfilteredEl.textContent = unfilteredTotal;
       document.getElementById('selectAllPeople').checked = false;
     }
 
@@ -2171,6 +2202,9 @@
     // Search handlers
     document.getElementById('searchInputDead').addEventListener('input', renderDeadList);
     document.getElementById('searchInputPeople').addEventListener('input', renderPeopleList);
+    
+    // Engagement filter handler
+    document.getElementById('minEngagementFilter').addEventListener('change', renderPeopleList);
 
     // Helper function for clipboard with fallback
     function copyToClipboard(text) {
@@ -2505,21 +2539,28 @@
     function handleResolveResponse(userId, response) {
       resolveState.resolved++;
       
+      console.log('handleResolveResponse:', userId, response);
+      
       if (response && response.success && response.handle) {
         resolveState.cache[userId] = response.handle;
         saveHandleCache();
         
-        // Update the account in allAccounts
+        // Update the account in allAccounts (compare as strings)
+        var userIdStr = String(userId);
+        var found = false;
         allAccounts.forEach(function(a) {
-          if (a.userId === userId) {
+          if (String(a.userId) === userIdStr) {
             a.handle = response.handle;
             a.name = response.handle;
             a.profileUrl = 'https://x.com/' + response.handle;
+            found = true;
           }
         });
+        console.log('Updated account for', userId, ':', found);
         
         // Re-render periodically (every 10)
         if (resolveState.resolved % 10 === 0) {
+          console.log('Re-rendering at', resolveState.resolved);
           renderDeadList();
           recalculateEngagement();
         }
