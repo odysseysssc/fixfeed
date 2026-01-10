@@ -714,7 +714,7 @@
 
           <!-- Dead weight section -->
           <div id="deadSection" class="tab-content" style="display: none;">
-            <p class="tab-desc">Zero engagement. Clogging your feed. Time to cut them loose.</p>
+            <p class="tab-desc">Accounts you follow but don't engage with. Don't unfollow these directly — use the "clean up" feature after curating your list to safely remove everyone not on it.</p>
             
             <div class="table-controls">
               <input type="text" class="search-input" id="searchInputDead" placeholder="Search...">
@@ -747,7 +747,7 @@
 
           <!-- Your people section -->
           <div id="peopleSection" class="tab-content">
-            <p class="tab-desc">The accounts you actually care about. Add them to a list and never miss a post.</p>
+            <p class="tab-desc">Accounts you actually engage with. Select all, copy handles, and add them to a curated X list with the extension. Then use "clean up" to unfollow the rest.</p>
             
             <div class="table-controls" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
               <input type="text" class="search-input" id="searchInputPeople" placeholder="Search..." style="flex: 1; min-width: 150px;">
@@ -1990,6 +1990,7 @@
       list.innerHTML = html;
 
       document.getElementById('totalPeopleCount').textContent = filtered.length;
+      document.getElementById('peopleCount').textContent = filtered.length; // Update tab count too
       var unfilteredEl = document.getElementById('totalPeopleUnfiltered');
       if (unfilteredEl) unfilteredEl.textContent = unfilteredTotal;
       document.getElementById('selectAllPeople').checked = false;
