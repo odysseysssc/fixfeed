@@ -663,8 +663,41 @@
             </button>
           </div>
           
+          <!-- Global resolve prompt - shows first time before data is usable -->
+          <div id="resolvePrompt" style="background: var(--cream-dark); border-radius: 4px; padding: 24px; margin-bottom: 24px; display: none;">
+            <div style="text-align: center; max-width: 500px; margin: 0 auto;">
+              <span style="font-size: 32px; display: block; margin-bottom: 12px;">🔗</span>
+              <h3 style="font-size: 18px; margin-bottom: 8px;">one more step</h3>
+              <p style="color: var(--gray); font-size: 14px; margin-bottom: 16px;">X archives no longer include usernames — just user IDs. We need to resolve these to actual @handles before we can show you useful data.</p>
+              <p style="color: var(--gray); font-size: 13px; margin-bottom: 20px;">This requires the extension and takes ~2 seconds per account. For <strong id="unresolvedCountPrompt">0</strong> accounts, that's about <strong id="estimatedTimePrompt">0 mins</strong>. Only needs to run once — we'll cache the results.</p>
+              
+              <div style="display: flex; flex-direction: column; gap: 12px; align-items: center;">
+                <a href="extension.html" target="_blank" class="btn" style="display: inline-block; text-decoration: none; padding: 12px 24px;">1. Get the Extension</a>
+                <p style="font-size: 12px; color: var(--gray);">Make sure you have <a href="https://x.com" target="_blank" style="color: var(--green);">x.com</a> open and are logged in</p>
+                <button id="startResolveBtn" class="btn" style="padding: 12px 24px;">2. Start Resolving</button>
+              </div>
+              
+              <p style="font-size: 12px; color: var(--gray); margin-top: 16px;">Or <a href="#" id="skipResolveBtn" style="color: var(--dark);">skip and view raw data →</a></p>
+            </div>
+          </div>
+          
+          <!-- Resolving in progress banner (global) -->
+          <div id="resolvingBannerGlobal" style="background: var(--green); color: var(--cream); border-radius: 4px; padding: 16px 20px; margin-bottom: 24px; display: none;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span class="spinner-small" style="width: 16px; height: 16px; border: 2px solid var(--cream); border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite;"></span>
+                <span style="font-size: 14px;"><strong id="resolvingCountGlobal">0</strong> / <strong id="resolvingTotalGlobal">0</strong> handles resolved</span>
+              </div>
+              <button id="pauseResolveBtnGlobal" class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px; background: transparent; border-color: var(--cream); color: var(--cream);">Pause</button>
+            </div>
+            <div style="background: rgba(255,255,255,0.2); height: 6px; border-radius: 3px;">
+              <div id="resolveProgressBarGlobal" style="background: var(--cream); height: 100%; border-radius: 3px; width: 0%; transition: width 0.3s;"></div>
+            </div>
+            <p style="font-size: 12px; opacity: 0.8; margin-top: 8px;">Tables will update as handles are resolved. You can keep browsing.</p>
+          </div>
+          
           <!-- Main tabs -->
-          <div class="main-tabs">
+          <div id="mainTabsSection" class="main-tabs">
             <button class="main-tab active" data-tab="people">
               ⭐ Your people <span class="tab-count" id="peopleCount">0</span>
             </button>
@@ -690,11 +723,8 @@
               <div class="table-header" id="deadTableHeader">
                 <div class="th th-check"><input type="checkbox" id="selectAllDead" class="select-all-checkbox" title="Select all"></div>
                 <div class="th th-account sortable" data-sort="name">Account</div>
-                <div class="th th-mutual sortable" data-sort="followsBack">Mutual</div>
                 <div class="th th-date sortable active-sort desc" data-sort="lastEngaged">Last engaged ↓</div>
-                <div class="th th-num sortable" data-sort="likes">Likes</div>
-                <div class="th th-num sortable" data-sort="replies">Replies</div>
-                <div class="th th-num sortable" data-sort="engagements">Total</div>
+                <div class="th th-num sortable" data-sort="engagements">Engagements</div>
                 <div class="th th-action"></div>
               </div>
               <div class="table-body" id="deadList"></div>
@@ -715,21 +745,14 @@
             
             <div class="table-controls">
               <input type="text" class="search-input" id="searchInputPeople" placeholder="Search...">
-              <div class="filter-tabs" id="filterTabsPeople">
-                <button class="filter-tab active" data-filter="all">All accounts</button>
-                <button class="filter-tab" data-filter="mutual">Follows back</button>
-              </div>
             </div>
 
             <div class="sortable-table">
               <div class="table-header" id="peopleTableHeader">
                 <div class="th th-check"><input type="checkbox" id="selectAllPeople" class="select-all-checkbox" title="Select all"></div>
                 <div class="th th-account sortable" data-sort="name">Account</div>
-                <div class="th th-mutual sortable" data-sort="followsBack">Mutual</div>
                 <div class="th th-date sortable" data-sort="lastEngaged">Last engaged</div>
-                <div class="th th-num sortable active-sort desc" data-sort="engagements">Total ↓</div>
-                <div class="th th-num sortable" data-sort="likes">Likes</div>
-                <div class="th th-num sortable" data-sort="replies">Replies</div>
+                <div class="th th-num sortable active-sort desc" data-sort="engagements">Engagements ↓</div>
                 <div class="th th-action"></div>
               </div>
               <div class="table-body" id="peopleList"></div>
@@ -1222,6 +1245,12 @@
         
         // Store engagedPeople globally for rendering
         window.engagedPeople = engagedPeople;
+        
+        // Store counts globally for recalculation after handle resolution
+        window.likeCounts = likeCounts;
+        window.replyCounts = replyCounts;
+        window.lastLikeDates = lastLikeDates;
+        window.lastReplyDates = lastReplyDates;
 
         progress.style.width = '100%';
         status.textContent = 'Complete!';
@@ -1241,6 +1270,10 @@
         document.getElementById('page2').classList.add('active');
         
         showResultsOrListSetup();
+        
+        // Apply any cached handles and check if resolve prompt needed
+        applyCachedHandles();
+        checkShowResolvePrompt();
 
         renderDeadList();
         renderPeopleList();
@@ -1869,19 +1902,14 @@
         var a = filtered[i];
         var lastEng = a.lastEngaged ? a.lastEngaged.replace('-', '/') : 'Never';
         var lastEngClass = a.lastEngaged ? '' : 'color: var(--danger);';
-        var mutual = a.followsBack ? '<span style="color:var(--success)">✓</span>' : '—';
         var engColor = a.engagements === 0 ? 'var(--danger)' : 'var(--dark)';
-        var displayName = a.userId ? ('ID: ...' + a.userId.slice(-6)) : a.name;
-        var displayHandle = a.userId ? a.userId : a.handle;
+        var displayName = a.userId ? ('ID: ...' + a.userId.slice(-6)) : ('@' + a.handle);
         var profileUrl = a.profileUrl || ('https://x.com/' + a.handle);
         
         html += '<div class="table-row">' +
           '<div class="cell cell-check"><input type="checkbox" class="done-checkbox done-checkbox-dead" data-handle="' + (a.profileUrl || a.handle) + '"></div>' +
-          '<div class="cell cell-account"><div class="avatar" style="background:' + getAvatarGradient(a.handle) + '; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:14px;">' + displayName.charAt(0).toUpperCase() + '</div><div class="account-info"><strong>' + displayName + '</strong><span style="font-size:11px;opacity:0.7;">' + (a.userId ? 'user_id' : '@' + a.handle) + '</span></div></div>' +
-          '<div class="cell cell-mutual">' + mutual + '</div>' +
+          '<div class="cell cell-account"><div class="avatar" style="background:' + getAvatarGradient(a.handle) + '; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:14px;">' + displayName.charAt(0).toUpperCase() + '</div><div class="account-info"><strong>' + displayName + '</strong></div></div>' +
           '<div class="cell cell-date" style="' + lastEngClass + '">' + lastEng + '</div>' +
-          '<div class="cell cell-num" style="color:var(--gray)">' + a.likes + '</div>' +
-          '<div class="cell cell-num" style="color:var(--gray)">' + a.replies + '</div>' +
           '<div class="cell cell-num" style="color:' + engColor + ';font-weight:600">' + a.engagements + '</div>' +
           '<div class="cell cell-action"><a href="' + profileUrl + '" target="_blank" class="action-link">Visit</a></div>' +
           '</div>';
@@ -1895,10 +1923,6 @@
     function renderPeopleList() {
       var engagedPeople = window.engagedPeople || [];
       var filtered = engagedPeople.slice();
-      
-      if (peopleFilter === 'mutual') {
-        filtered = filtered.filter(function(a) { return a.followsBack; });
-      }
 
       var search = document.getElementById('searchInputPeople').value.toLowerCase();
       if (search) {
@@ -1911,11 +1935,8 @@
       filtered.sort(function(a, b) {
         var aVal, bVal, field = peopleSort.field;
         if (field === 'name') { aVal = a.name.toLowerCase(); bVal = b.name.toLowerCase(); }
-        else if (field === 'followsBack') { aVal = a.followsBack ? 1 : 0; bVal = b.followsBack ? 1 : 0; }
         else if (field === 'lastEngaged') { aVal = a.lastEngaged || '0000-00'; bVal = b.lastEngaged || '0000-00'; }
         else if (field === 'engagements') { aVal = a.engagements; bVal = b.engagements; }
-        else if (field === 'likes') { aVal = a.likes; bVal = b.likes; }
-        else if (field === 'replies') { aVal = a.replies; bVal = b.replies; }
         else return 0;
         if (aVal < bVal) return peopleSort.direction === 'asc' ? -1 : 1;
         if (aVal > bVal) return peopleSort.direction === 'asc' ? 1 : -1;
@@ -1931,11 +1952,9 @@
         
         html += '<div class="table-row">' +
           '<div class="cell cell-check"><input type="checkbox" class="done-checkbox done-checkbox-people" data-handle="' + a.handle + '"></div>' +
-          '<div class="cell cell-account"><div class="avatar" style="background:' + getAvatarGradient(a.handle) + '; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:14px;">' + a.handle.charAt(0).toUpperCase() + '</div><div class="account-info"><strong>@' + a.handle + '</strong><span style="font-size:11px;opacity:0.7;">' + a.engagements + ' engagements</span></div></div>' +
+          '<div class="cell cell-account"><div class="avatar" style="background:' + getAvatarGradient(a.handle) + '; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:14px;">' + a.handle.charAt(0).toUpperCase() + '</div><div class="account-info"><strong>@' + a.handle + '</strong></div></div>' +
           '<div class="cell cell-date">' + lastEng + '</div>' +
           '<div class="cell cell-num" style="color:var(--success);font-weight:600">' + a.engagements + '</div>' +
-          '<div class="cell cell-num">' + a.likes + '</div>' +
-          '<div class="cell cell-num">' + a.replies + '</div>' +
           '<div class="cell cell-action"><a href="' + profileUrl + '" target="_blank" class="action-link action-link-success">Visit</a></div>' +
           '</div>';
       }
@@ -2292,6 +2311,253 @@
       document.getElementById('processingInfo').classList.remove('active');
       document.getElementById('uploadProgress').style.width = '0%';
     });
+
+    // ====== RESOLVE HANDLES LOGIC ======
+    var resolveState = {
+      isResolving: false,
+      isPaused: false,
+      resolved: 0,
+      total: 0,
+      cache: {} // userId -> handle mapping
+    };
+
+    // Load cached mappings from localStorage
+    function loadHandleCache() {
+      try {
+        var cached = localStorage.getItem('fixfeed_handle_cache');
+        if (cached) {
+          resolveState.cache = JSON.parse(cached);
+          console.log('Loaded', Object.keys(resolveState.cache).length, 'cached handle mappings');
+        }
+      } catch (e) {
+        console.error('Error loading cache:', e);
+      }
+    }
+
+    // Save cache to localStorage
+    function saveHandleCache() {
+      try {
+        localStorage.setItem('fixfeed_handle_cache', JSON.stringify(resolveState.cache));
+      } catch (e) {
+        console.error('Error saving cache:', e);
+      }
+    }
+
+    // Check if we need to show resolve prompt (has unresolved user IDs)
+    function checkShowResolvePrompt() {
+      var unresolvedCount = allAccounts.filter(function(a) {
+        return a.userId && !resolveState.cache[a.userId];
+      }).length;
+      
+      var prompt = document.getElementById('resolvePrompt');
+      if (unresolvedCount > 0) {
+        prompt.style.display = 'block';
+        document.getElementById('unresolvedCountPrompt').textContent = unresolvedCount;
+        // Estimate time: 2 sec per account
+        var mins = Math.ceil(unresolvedCount * 2 / 60);
+        var timeStr = mins < 60 ? mins + ' mins' : Math.round(mins / 60 * 10) / 10 + ' hours';
+        document.getElementById('estimatedTimePrompt').textContent = timeStr;
+      } else {
+        prompt.style.display = 'none';
+      }
+    }
+
+    // Apply cached handles to accounts
+    function applyCachedHandles() {
+      var updated = 0;
+      allAccounts.forEach(function(a) {
+        if (a.userId && resolveState.cache[a.userId]) {
+          var handle = resolveState.cache[a.userId];
+          a.handle = handle;
+          a.name = handle;
+          a.profileUrl = 'https://x.com/' + handle;
+          updated++;
+        }
+      });
+      console.log('Applied', updated, 'cached handles');
+      if (updated > 0) {
+        renderDeadList();
+        recalculateEngagement();
+      }
+    }
+
+    // Recalculate engagement now that we have handles
+    function recalculateEngagement() {
+      var likeCounts = window.likeCounts || {};
+      var replyCounts = window.replyCounts || {};
+      var lastLikeDates = window.lastLikeDates || {};
+      var lastReplyDates = window.lastReplyDates || {};
+      
+      allAccounts.forEach(function(a) {
+        if (a.handle && !a.handle.startsWith('user_id=')) {
+          var handle = a.handle.toLowerCase();
+          a.likes = likeCounts[handle] || 0;
+          a.replies = replyCounts[handle] || 0;
+          a.engagements = a.likes + a.replies;
+          var lastLike = lastLikeDates[handle];
+          var lastReply = lastReplyDates[handle];
+          if (lastLike && lastReply) a.lastEngaged = lastLike > lastReply ? lastLike : lastReply;
+          else a.lastEngaged = lastLike || lastReply || null;
+        }
+      });
+      
+      // Update counts
+      var deadAccounts = allAccounts.filter(function(a) { return a.engagements === 0; });
+      var engagedAccounts = allAccounts.filter(function(a) { return a.engagements > 0; });
+      document.getElementById('deadCount').textContent = deadAccounts.length;
+      document.getElementById('peopleCount').textContent = engagedAccounts.length;
+      
+      renderDeadList();
+      renderPeopleList();
+    }
+
+    // Start resolving handles via extension
+    document.getElementById('startResolveBtn').addEventListener('click', function() {
+      startResolving();
+    });
+    
+    // Skip resolve and view raw data
+    document.getElementById('skipResolveBtn').addEventListener('click', function(e) {
+      e.preventDefault();
+      document.getElementById('resolvePrompt').style.display = 'none';
+    });
+
+    // Pause/resume button
+    document.getElementById('pauseResolveBtnGlobal').addEventListener('click', function() {
+      if (resolveState.isPaused) {
+        resolveState.isPaused = false;
+        this.textContent = 'Pause';
+        continueResolving();
+      } else {
+        resolveState.isPaused = true;
+        this.textContent = 'Resume';
+      }
+    });
+
+    function startResolving() {
+      // Get unresolved accounts
+      var toResolve = allAccounts.filter(function(a) {
+        return a.userId && !resolveState.cache[a.userId];
+      });
+      
+      if (toResolve.length === 0) {
+        alert('All handles already resolved!');
+        document.getElementById('resolvePrompt').style.display = 'none';
+        return;
+      }
+      
+      resolveState.isResolving = true;
+      resolveState.isPaused = false;
+      resolveState.resolved = 0;
+      resolveState.total = toResolve.length;
+      resolveState.queue = toResolve.map(function(a) { return a.userId; });
+      
+      // Update UI - hide prompt, show progress banner
+      document.getElementById('resolvePrompt').style.display = 'none';
+      document.getElementById('resolvingBannerGlobal').style.display = 'block';
+      document.getElementById('resolvingTotalGlobal').textContent = resolveState.total;
+      document.getElementById('resolvingCountGlobal').textContent = '0';
+      document.getElementById('resolveProgressBarGlobal').style.width = '0%';
+      
+      continueResolving();
+    }
+
+    function continueResolving() {
+      if (resolveState.isPaused || resolveState.queue.length === 0) {
+        if (resolveState.queue.length === 0) {
+          finishResolving();
+        }
+        return;
+      }
+      
+      var userId = resolveState.queue.shift();
+      
+      // Post message to any listening content script from our extension
+      // The extension injects a content script on fixyourfeed.xyz that relays to background
+      window.postMessage({ 
+        type: 'FIXFEED_RESOLVE_REQUEST', 
+        userId: userId 
+      }, '*');
+      
+      // Set timeout in case extension isn't installed
+      resolveState.currentTimeout = setTimeout(function() {
+        if (!resolveState.cache[userId]) {
+          // Extension didn't respond - show help message
+          document.getElementById('resolveStatus').style.display = 'block';
+          document.getElementById('resolveStatus').innerHTML = 
+            '⚠️ Extension not responding. Make sure:<br>' +
+            '1. FixYourFeed extension is installed<br>' +
+            '2. You have <a href="https://x.com" target="_blank" style="color:var(--green)">x.com</a> open in another tab<br>' +
+            '3. You are logged in to X';
+          document.getElementById('resolveStatus').style.color = 'var(--danger)';
+          
+          // Skip this one and continue
+          handleResolveResponse(userId, { success: false, error: 'No extension response' });
+        }
+      }, 10000);
+    }
+    
+    // Listen for responses from extension content script
+    window.addEventListener('message', function(event) {
+      if (event.data && event.data.type === 'FIXFEED_RESOLVE_RESPONSE') {
+        // Clear timeout
+        if (resolveState.currentTimeout) {
+          clearTimeout(resolveState.currentTimeout);
+        }
+        handleResolveResponse(event.data.userId, {
+          success: event.data.success,
+          handle: event.data.handle,
+          error: event.data.error
+        });
+      }
+    });
+
+    function handleResolveResponse(userId, response) {
+      resolveState.resolved++;
+      
+      if (response && response.success && response.handle) {
+        resolveState.cache[userId] = response.handle;
+        saveHandleCache();
+        
+        // Update the account in allAccounts
+        allAccounts.forEach(function(a) {
+          if (a.userId === userId) {
+            a.handle = response.handle;
+            a.name = response.handle;
+            a.profileUrl = 'https://x.com/' + response.handle;
+          }
+        });
+        
+        // Re-render periodically (every 10)
+        if (resolveState.resolved % 10 === 0) {
+          renderDeadList();
+          recalculateEngagement();
+        }
+      }
+      
+      // Update progress
+      document.getElementById('resolvingCountGlobal').textContent = resolveState.resolved;
+      var pct = (resolveState.resolved / resolveState.total * 100).toFixed(1);
+      document.getElementById('resolveProgressBarGlobal').style.width = pct + '%';
+      
+      // Continue with delay to avoid rate limits
+      setTimeout(continueResolving, 2000);
+    }
+
+    function finishResolving() {
+      resolveState.isResolving = false;
+      document.getElementById('resolvingBannerGlobal').style.display = 'none';
+      
+      // Final render and recalculate
+      renderDeadList();
+      recalculateEngagement();
+      
+      alert('Done! Resolved ' + resolveState.resolved + ' handles.');
+      checkShowResolvePrompt();
+    }
+
+    // Load cache on page load
+    loadHandleCache();
   </script>
 </body>
 </html>
