@@ -1316,7 +1316,7 @@
         document.getElementById('totalDeadCount').textContent = deadAccounts.length;
         document.getElementById('totalPeopleCount').textContent = engagedPeople.length;
         document.getElementById('topTweetsCount2').textContent = Math.min(allTweets.length, 50);
-        document.getElementById('mentionsCount2').textContent = allMentions.length;
+        
 
         document.getElementById('page1').classList.remove('active');
         document.getElementById('page2').classList.add('active');
@@ -1331,7 +1331,7 @@
         renderDeadList();
         renderPeopleList();
         renderTopTweets();
-        renderMentionsList();
+        
 
       } catch (err) {
         console.error('Error processing files:', err);
@@ -1579,7 +1579,7 @@
         document.getElementById('totalDeadCount').textContent = deadAccounts.length;
         document.getElementById('totalPeopleCount').textContent = engagedAccounts.length;
         document.getElementById('topTweetsCount2').textContent = Math.min(allTweets.length, 50);
-        document.getElementById('mentionsCount2').textContent = allMentions.length;
+        
 
         // Switch to results page
         document.getElementById('page1').classList.remove('active');
@@ -1591,7 +1591,7 @@
         renderDeadList();
         renderPeopleList();
         renderTopTweets();
-        renderMentionsList();
+        
 
       } catch (err) {
         console.error('Error processing Community Archive:', err);
@@ -1898,7 +1898,7 @@
         document.getElementById('totalDeadCount').textContent = deadAccounts.length;
         document.getElementById('totalPeopleCount').textContent = engagedPeople.length;
         document.getElementById('topTweetsCount2').textContent = Math.min(allTweets.length, 50);
-        document.getElementById('mentionsCount2').textContent = allMentions.length;
+        
 
         // Switch to results page
         document.getElementById('page1').classList.remove('active');
@@ -1910,7 +1910,7 @@
         renderDeadList();
         renderPeopleList();
         renderTopTweets();
-        renderMentionsList();
+        
 
       } catch (err) {
         console.error('Error processing archive:', err);
@@ -2164,52 +2164,6 @@
       list.innerHTML = html;
     }
 
-    // Mentions sort state
-    var mentionsSort = { field: 'mentions', direction: 'desc' };
-
-    function renderMentionsList() {
-      var filtered = allMentions.slice();
-
-      var search = document.getElementById('searchInputMentions').value.toLowerCase();
-      if (search) {
-        filtered = filtered.filter(function(m) {
-          return m.handle.toLowerCase().indexOf(search) !== -1;
-        });
-      }
-
-      filtered.sort(function(a, b) {
-        var aVal, bVal, field = mentionsSort.field;
-        if (field === 'mentions') { aVal = a.mentions; bVal = b.mentions; }
-        else if (field === 'replies') { aVal = a.replies; bVal = b.replies; }
-        else if (field === 'lastMentioned') { aVal = a.lastMentioned || '0000-00'; bVal = b.lastMentioned || '0000-00'; }
-        else return 0;
-        if (aVal < bVal) return mentionsSort.direction === 'asc' ? -1 : 1;
-        if (aVal > bVal) return mentionsSort.direction === 'asc' ? 1 : -1;
-        return 0;
-      });
-
-      var list = document.getElementById('mentionsList');
-      var html = '';
-      
-      for (var i = 0; i < filtered.length; i++) {
-        var m = filtered[i];
-        var lastMen = m.lastMentioned ? m.lastMentioned.replace('-', '/') : '—';
-        
-        html += '<div class="table-row">' +
-          '<div class="cell cell-account"><a href="https://x.com/' + m.handle + '" target="_blank" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;"><div class="avatar" style="background:' + getAvatarGradient(m.handle) + '; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; font-size:14px;">' + m.handle.charAt(0).toUpperCase() + '</div><div class="account-info"><strong>@' + m.handle + '</strong></div></a></div>' +
-          '<div class="cell cell-num" style="color:var(--green);font-weight:600">' + m.mentions + '</div>' +
-          '<div class="cell cell-num">' + m.replies + '</div>' +
-          '<div class="cell cell-date">' + lastMen + '</div>' +
-        '</div>';
-      }
-      
-      if (filtered.length === 0) {
-        html = '<div style="text-align:center;padding:40px;color:var(--gray);">No mentions found</div>';
-      }
-      
-      list.innerHTML = html;
-    }
-
     // Filter tabs for dead section
     document.getElementById('filterTabsDead').addEventListener('click', function(e) {
       if (e.target.classList.contains('filter-tab')) {
@@ -2233,35 +2187,6 @@
     // Search for tweets
     document.getElementById('searchInputTweets').addEventListener('input', function() {
       renderTopTweets();
-    });
-
-    // Search for mentions
-    document.getElementById('searchInputMentions').addEventListener('input', function() {
-      renderMentionsList();
-    });
-
-    // Column header sorting for mentions table
-    document.getElementById('mentionsTableHeader').addEventListener('click', function(e) {
-      var th = e.target.closest('.th.sortable');
-      if (!th) return;
-      
-      var field = th.dataset.sort;
-      if (mentionsSort.field === field) {
-        mentionsSort.direction = mentionsSort.direction === 'asc' ? 'desc' : 'asc';
-      } else {
-        mentionsSort.field = field;
-        mentionsSort.direction = 'desc';
-      }
-      
-      // Update header UI
-      this.querySelectorAll('.th.sortable').forEach(function(t) {
-        t.classList.remove('active-sort', 'asc', 'desc');
-        t.textContent = t.textContent.replace(' ↑', '').replace(' ↓', '');
-      });
-      th.classList.add('active-sort', mentionsSort.direction);
-      th.textContent += mentionsSort.direction === 'asc' ? ' ↑' : ' ↓';
-      
-      renderMentionsList();
     });
 
     // Column header sorting for dead table
