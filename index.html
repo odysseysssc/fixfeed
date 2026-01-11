@@ -702,8 +702,8 @@
             <p style="font-size: 12px; opacity: 0.8; margin-top: 8px;">Tables will update as handles are resolved. You can keep browsing.</p>
           </div>
           
-          <!-- Main tabs -->
-          <div id="mainTabsSection" class="main-tabs">
+          <!-- Main tabs - hidden, just Your People now -->
+          <div id="mainTabsSection" class="main-tabs" style="display: none;">
             <button class="main-tab active" data-tab="people">
               ⭐ Your people <span class="tab-count" id="peopleCount">0</span>
             </button>
@@ -712,7 +712,7 @@
             </button>
           </div>
 
-          <!-- Dead weight section -->
+          <!-- Dead weight section - hidden -->
           <div id="deadSection" class="tab-content" style="display: none;">
             <p class="tab-desc">Accounts you follow but don't engage with. Don't unfollow these directly — use the "clean up" feature after curating your list to safely remove everyone not on it.</p>
             
@@ -745,12 +745,65 @@
             </div>
           </div>
 
+          <!-- Two-step process header -->
+          <div style="margin-bottom: 32px;">
+            <h2 style="font-size: 24px; text-align: center; margin-bottom: 24px;">🎯 Fix your feed in 2 steps</h2>
+            
+            <!-- Extension download box -->
+            <div style="background: var(--green); color: var(--cream); border-radius: 8px; padding: 20px; margin-bottom: 24px; text-align: center;">
+              <p style="font-size: 14px; margin-bottom: 12px;"><strong>⚡ You'll need the free browser extension</strong></p>
+              <a href="extension.html" target="_blank" class="btn" style="background: var(--cream); color: var(--dark); text-decoration: none; display: inline-block; padding: 12px 24px;">Download Extension</a>
+              <p style="font-size: 12px; margin-top: 12px; opacity: 0.9;">Chrome/Brave/Edge • Unzip → chrome://extensions → Load unpacked</p>
+            </div>
+            
+            <div style="display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; margin-bottom: 24px;">
+              <!-- Step 1 -->
+              <div style="flex: 1; min-width: 280px; max-width: 400px; background: var(--cream-dark); border-radius: 8px; padding: 20px; position: relative;">
+                <div style="position: absolute; top: -10px; left: 16px; background: var(--green); color: var(--cream); font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 4px;">STEP 1: CURATE</div>
+                <div style="margin-top: 8px;">
+                  <p style="font-size: 13px; color: var(--dark); line-height: 1.6; margin-bottom: 0;">
+                    <strong>1.</strong> Choose min engagements below (5+ recommended)<br>
+                    <strong>2.</strong> Click "Select all" then "Copy handles"<br>
+                    <strong>3.</strong> <a href="https://x.com/i/lists/create" target="_blank" style="color: var(--green);">Create a new X list</a> and copy its URL<br>
+                    <strong>4.</strong> Open extension → "Curate list" tab<br>
+                    <strong>5.</strong> Paste handles + list URL → Start
+                  </p>
+                </div>
+              </div>
+              
+              <!-- Step 2 -->
+              <div style="flex: 1; min-width: 280px; max-width: 400px; background: var(--cream-dark); border-radius: 8px; padding: 20px; position: relative; opacity: 0.7;">
+                <div style="position: absolute; top: -10px; left: 16px; background: var(--danger); color: white; font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 4px;">STEP 2: CLEAN UP</div>
+                <div style="margin-top: 8px;">
+                  <p style="font-size: 13px; color: var(--dark); line-height: 1.6; margin-bottom: 12px;">
+                    <strong>After Step 1 completes:</strong><br>
+                    <strong>1.</strong> Open extension → "Clean up" tab<br>
+                    <strong>2.</strong> Paste the same list URL<br>
+                    <strong>3.</strong> Click Start — unfollows everyone NOT on your curated list
+                  </p>
+                  <p style="font-size: 11px; color: var(--gray); margin: 0;">⚠️ Only do this after your curated list is complete</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Your people section -->
-          <div id="peopleSection" class="tab-content">
-            <p class="tab-desc">Accounts you actually engage with. Select all, copy handles, and add them to a curated X list with the extension. Then use "clean up" to unfollow the rest.</p>
+          <div id="peopleSection" class="tab-content" style="display: block;">
+            <h3 style="font-size: 16px; margin-bottom: 16px;">⭐ Your People <span style="color: var(--gray); font-weight: 400;">— accounts you actually engage with</span></h3>
             
             <div class="table-controls" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
               <input type="text" class="search-input" id="searchInputPeople" placeholder="Search..." style="flex: 1; min-width: 150px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <label style="font-size: 12px; color: var(--gray); white-space: nowrap;">Lookback:</label>
+                <select id="lookbackFilter" style="padding: 8px 12px; border: 2px solid var(--cream-dark); border-radius: 4px; background: var(--cream); font-family: 'Space Mono', monospace; font-size: 12px;">
+                  <option value="all" selected>All time</option>
+                  <option value="5">5 years</option>
+                  <option value="4">4 years</option>
+                  <option value="3">3 years</option>
+                  <option value="2">2 years</option>
+                  <option value="1">1 year</option>
+                </select>
+              </div>
               <div style="display: flex; align-items: center; gap: 8px;">
                 <label style="font-size: 12px; color: var(--gray); white-space: nowrap;">Min engagements:</label>
                 <select id="minEngagementFilter" style="padding: 8px 12px; border: 2px solid var(--cream-dark); border-radius: 4px; background: var(--cream); font-family: 'Space Mono', monospace; font-size: 12px;">
@@ -778,19 +831,10 @@
             <div class="table-footer">
               <span class="progress-text"><span id="totalPeopleCount">0</span> accounts (of <span id="totalPeopleUnfiltered">0</span> total)</span>
               <div style="display: flex; align-items: center; gap: 12px;">
-                <span style="font-size: 12px; color: var(--gray);">Use with our free extension to add to a list →</span>
+                <button class="btn btn-sm" id="selectAllPeopleBtn" style="padding: 8px 16px;">Select all</button>
                 <button class="btn btn-secondary btn-sm" id="copyPeopleBtn">Copy handles</button>
               </div>
             </div>
-          </div>
-
-          <!-- Extension CTA -->
-          <div class="extension-cta">
-            <div>
-              <h3>⚡ Automate the boring stuff</h3>
-              <p>Bulk unfollow dead weight. Mass add to lists. One click.</p>
-            </div>
-            <button class="btn" id="getExtensionBtn">Get Free Extension</button>
           </div>
 
           <!-- Tip jar -->
@@ -1076,12 +1120,9 @@
           if (handle) followerHandles.add(handle);
         });
 
-        // Count likes per user (last 2 years only)
-        var likeCounts = {};
-        var lastLikeDates = {};
-        var twoYearsAgo = new Date();
-        twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
-        var cutoffDate = twoYearsAgo.toISOString().slice(0, 7); // YYYY-MM format
+        // Store ALL engagement dates per user (for lookback filtering)
+        var allLikeDates = {}; // handle -> [date1, date2, ...]
+        var allReplyDates = {}; // handle -> [date1, date2, ...]
         
         likeData.forEach(function(l) {
           // X changed archive format - expandedUrl no longer has username
@@ -1108,47 +1149,39 @@
           if (handle && handle !== 'i' && handle !== 'web') {
             var tweetId = l.like?.tweetId || l.tweetId || '';
             var date = tweetId ? extractDateFromId(tweetId) : null;
-            // Only count if within last 2 years
-            if (!date || date >= cutoffDate) {
-              likeCounts[handle] = (likeCounts[handle] || 0) + 1;
-              if (date && (!lastLikeDates[handle] || date > lastLikeDates[handle])) {
-                lastLikeDates[handle] = date;
-              }
-            }
+            // Store all dates for later filtering
+            if (!allLikeDates[handle]) allLikeDates[handle] = [];
+            if (date) allLikeDates[handle].push(date);
           }
         });
         
-        console.log('Like counts:', Object.keys(likeCounts).length, 'accounts');
-        console.log('Sample likes:', Object.entries(likeCounts).slice(0, 5));
+        console.log('Like dates stored for', Object.keys(allLikeDates).length, 'accounts');
 
-        // Count replies per user and collect top tweets (last 2 years only)
-        var replyCounts = {};
-        var lastReplyDates = {};
+        // Count replies per user and collect top tweets - store ALL dates
         allTweets = [];
         
         tweetsData.forEach(function(t) {
           var tweet = t.tweet;
           var replyTo = tweet?.in_reply_to_screen_name?.toLowerCase();
-          var tweetDate = tweet?.created_at ? tweet.created_at.slice(0, 7) : null;
+          var tweetDate = tweet?.created_at ? new Date(tweet.created_at).toISOString().slice(0, 7) : null;
           
-          // Only count replies from last 2 years
-          if (replyTo && (!tweetDate || tweetDate >= cutoffDate)) {
-            replyCounts[replyTo] = (replyCounts[replyTo] || 0) + 1;
-            if (tweetDate && (!lastReplyDates[replyTo] || tweetDate > lastReplyDates[replyTo])) {
-              lastReplyDates[replyTo] = tweetDate;
-            }
+          // Store reply dates
+          if (replyTo) {
+            if (!allReplyDates[replyTo]) allReplyDates[replyTo] = [];
+            if (tweetDate) allReplyDates[replyTo].push(tweetDate);
           }
           
-          // Collect tweets for Top Tweets (last 2 years only)
+          // Collect tweets for Top Tweets
           var likes = parseInt(tweet?.favorite_count) || 0;
           var retweets = parseInt(tweet?.retweet_count) || 0;
-          if ((likes + retweets > 0) && (!tweetDate || tweetDate >= cutoffDate)) {
+          if (likes + retweets > 0) {
             allTweets.push({
               id: tweet?.id_str || tweet?.id,
               text: tweet?.full_text || '',
               likes: likes,
               retweets: retweets,
               date: tweet?.created_at,
+              dateStr: tweetDate,
               isReply: !!replyTo,
               score: likes + retweets
             });
@@ -1156,6 +1189,25 @@
         });
 
         allTweets.sort(function(a, b) { return b.score - a.score; });
+        
+        // Store raw engagement dates globally for lookback filtering
+        window.allLikeDates = allLikeDates;
+        window.allReplyDates = allReplyDates;
+        
+        // Calculate initial counts (all time)
+        var likeCounts = {};
+        var lastLikeDates = {};
+        Object.keys(allLikeDates).forEach(function(handle) {
+          likeCounts[handle] = allLikeDates[handle].length;
+          lastLikeDates[handle] = allLikeDates[handle].sort().reverse()[0] || null;
+        });
+        
+        var replyCounts = {};
+        var lastReplyDates = {};
+        Object.keys(allReplyDates).forEach(function(handle) {
+          replyCounts[handle] = allReplyDates[handle].length;
+          lastReplyDates[handle] = allReplyDates[handle].sort().reverse()[0] || null;
+        });
 
         // Build accounts list from following data
         // New X format uses user IDs, not handles
@@ -1285,6 +1337,7 @@
 
         document.getElementById('page1').classList.remove('active');
         document.getElementById('page2').classList.add('active');
+        window.scrollTo(0, 0);
         
         showResultsOrListSetup();
         
@@ -1548,6 +1601,7 @@
         // Switch to results page
         document.getElementById('page1').classList.remove('active');
         document.getElementById('page2').classList.add('active');
+        window.scrollTo(0, 0);
         
         showResultsOrListSetup();
 
@@ -1624,9 +1678,11 @@
         twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
         var cutoffDate = twoYearsAgo.toISOString().slice(0, 7); // YYYY-MM format
 
-        // Parse likes - track counts and dates (last 2 years only)
-        var likeCounts = {};
+        // Parse likes - store ALL dates for lookback filtering
+        var allLikeDates = {}; // handle -> [date1, date2, ...]
+        var allReplyDates = {}; // handle -> [date1, date2, ...]
         var lastEngagedDates = {};
+        
         var likeFile = zip.file(/like\.js$/i)[0];
         if (likeFile) {
           var likeContent = await likeFile.async('string');
@@ -1654,13 +1710,9 @@
             
             if (handle && handle !== 'i' && handle !== 'web') {
               var date = l.like?.tweetId ? extractDateFromId(l.like.tweetId) : null;
-              // Only count if within last 2 years
-              if (!date || date >= cutoffDate) {
-                likeCounts[handle] = (likeCounts[handle] || 0) + 1;
-                if (date && (!lastEngagedDates[handle] || date > lastEngagedDates[handle])) {
-                  lastEngagedDates[handle] = date;
-                }
-              }
+              // Store ALL dates for lookback filtering
+              if (!allLikeDates[handle]) allLikeDates[handle] = [];
+              if (date) allLikeDates[handle].push(date);
             }
           });
         }
@@ -1668,8 +1720,7 @@
         progress.style.width = '80%';
         status.textContent = 'Processing tweets & mentions...';
 
-        // Parse tweets for replies, top tweets, and mentions (last 2 years only)
-        var replyCounts = {};
+        // Parse tweets for replies, top tweets, and mentions - store ALL dates
         var mentionCounts = {};
         var mentionDates = {};
         allTweets = [];
@@ -1687,44 +1738,35 @@
             var retweets = parseInt(tweet?.retweet_count) || 0;
             var id = tweet?.id_str || tweet?.id;
             
-            // Check if within last 2 years
             var tweetDateStr = null;
             if (createdAt) {
               var date = new Date(createdAt);
               tweetDateStr = date.toISOString().slice(0, 7);
             }
-            var isRecent = !tweetDateStr || tweetDateStr >= cutoffDate;
             
-            // Track replies (only recent)
-            if (replyTo && isRecent) {
+            // Store ALL reply dates for lookback filtering
+            if (replyTo) {
               var handle = replyTo.toLowerCase();
-              replyCounts[handle] = (replyCounts[handle] || 0) + 1;
-              // Track most recent engagement date
-              if (tweetDateStr) {
-                if (!lastEngagedDates[handle] || tweetDateStr > lastEngagedDates[handle]) {
-                  lastEngagedDates[handle] = tweetDateStr;
-                }
-              }
+              if (!allReplyDates[handle]) allReplyDates[handle] = [];
+              if (tweetDateStr) allReplyDates[handle].push(tweetDateStr);
             }
             
-            // Track mentions (only recent)
-            if (isRecent) {
-              var mentions = tweet?.entities?.user_mentions || [];
-              mentions.forEach(function(m) {
-                if (m.screen_name) {
-                  var mHandle = m.screen_name.toLowerCase();
-                  mentionCounts[mHandle] = (mentionCounts[mHandle] || 0) + 1;
-                  if (tweetDateStr) {
-                    if (!mentionDates[mHandle] || tweetDateStr > mentionDates[mHandle]) {
-                      mentionDates[mHandle] = tweetDateStr;
-                    }
+            // Track mentions (all time for now)
+            var mentions = tweet?.entities?.user_mentions || [];
+            mentions.forEach(function(m) {
+              if (m.screen_name) {
+                var mHandle = m.screen_name.toLowerCase();
+                mentionCounts[mHandle] = (mentionCounts[mHandle] || 0) + 1;
+                if (tweetDateStr) {
+                  if (!mentionDates[mHandle] || tweetDateStr > mentionDates[mHandle]) {
+                    mentionDates[mHandle] = tweetDateStr;
                   }
                 }
-              });
-            }
+              }
+            });
             
-            // Collect tweets for top tweets (exclude pure retweets, only recent)
-            if (!text.startsWith('RT @') && isRecent) {
+            // Collect ALL tweets for top tweets (exclude pure retweets)
+            if (!text.startsWith('RT @')) {
               allTweets.push({
                 id: id,
                 text: text,
@@ -1732,6 +1774,7 @@
                 retweets: retweets,
                 score: likes + retweets,
                 date: createdAt,
+                dateStr: tweetDateStr,
                 isReply: !!replyTo
               });
             }
@@ -1740,6 +1783,33 @@
         
         // Sort tweets by score
         allTweets.sort(function(a, b) { return b.score - a.score; });
+        
+        // Store raw engagement dates globally for lookback filtering
+        window.allLikeDates = allLikeDates;
+        window.allReplyDates = allReplyDates;
+        
+        // Calculate initial counts (all time)
+        var likeCounts = {};
+        var lastLikeDates = {};
+        Object.keys(allLikeDates).forEach(function(handle) {
+          likeCounts[handle] = allLikeDates[handle].length;
+          var sorted = allLikeDates[handle].slice().sort().reverse();
+          lastLikeDates[handle] = sorted[0] || null;
+        });
+        
+        var replyCounts = {};
+        var lastReplyDates = {};
+        Object.keys(allReplyDates).forEach(function(handle) {
+          replyCounts[handle] = allReplyDates[handle].length;
+          var sorted = allReplyDates[handle].slice().sort().reverse();
+          lastReplyDates[handle] = sorted[0] || null;
+        });
+        
+        // Store counts globally
+        window.likeCounts = likeCounts;
+        window.replyCounts = replyCounts;
+        window.lastLikeDates = lastLikeDates;
+        window.lastReplyDates = lastReplyDates;
         
         // Build mentions list
         allMentions = Object.keys(mentionCounts).map(function(handle) {
@@ -1760,6 +1830,12 @@
           var h = handle.toLowerCase();
           var likes = likeCounts[h] || 0;
           var replies = replyCounts[h] || 0;
+          var lastLike = lastLikeDates[h];
+          var lastReply = lastReplyDates[h];
+          var lastEngaged = null;
+          if (lastLike && lastReply) lastEngaged = lastLike > lastReply ? lastLike : lastReply;
+          else lastEngaged = lastLike || lastReply;
+          
           return {
             handle: handle,
             name: handle,
@@ -1768,9 +1844,62 @@
             engagements: likes + replies,
             likes: likes,
             replies: replies,
-            lastEngaged: lastEngagedDates[h] || null
+            lastEngaged: lastEngaged
           };
         });
+        
+        // Build engaged people list
+        var seenHandles = new Set(following.map(function(h) { return h.toLowerCase(); }));
+        var engagedPeople = [];
+        
+        Object.keys(replyCounts).forEach(function(handle) {
+          if (!seenHandles.has(handle)) {
+            seenHandles.add(handle);
+            var likes = likeCounts[handle] || 0;
+            var replies = replyCounts[handle] || 0;
+            var lastLike = lastLikeDates[handle];
+            var lastReply = lastReplyDates[handle];
+            var lastEngaged = null;
+            if (lastLike && lastReply) lastEngaged = lastLike > lastReply ? lastLike : lastReply;
+            else lastEngaged = lastLike || lastReply;
+            
+            engagedPeople.push({
+              handle: handle,
+              name: handle,
+              profileUrl: 'https://x.com/' + handle,
+              likes: likes,
+              replies: replies,
+              engagements: likes + replies,
+              lastEngaged: lastEngaged
+            });
+          }
+        });
+        
+        Object.keys(likeCounts).forEach(function(handle) {
+          if (!seenHandles.has(handle)) {
+            seenHandles.add(handle);
+            var likes = likeCounts[handle] || 0;
+            var replies = replyCounts[handle] || 0;
+            var lastLike = lastLikeDates[handle];
+            var lastReply = lastReplyDates[handle];
+            var lastEngaged = null;
+            if (lastLike && lastReply) lastEngaged = lastLike > lastReply ? lastLike : lastReply;
+            else lastEngaged = lastLike || lastReply;
+            
+            engagedPeople.push({
+              handle: handle,
+              name: handle,
+              profileUrl: 'https://x.com/' + handle,
+              likes: likes,
+              replies: replies,
+              engagements: likes + replies,
+              lastEngaged: lastEngaged
+            });
+          }
+        });
+        
+        engagedPeople.sort(function(a, b) { return b.engagements - a.engagements; });
+        window.engagedPeople = engagedPeople;
 
         progress.style.width = '100%';
         status.textContent = 'Complete!';
@@ -1779,19 +1908,19 @@
 
         // Setup results
         var deadAccounts = allAccounts.filter(function(a) { return a.engagements === 0; });
-        var engagedAccounts = allAccounts.filter(function(a) { return a.engagements > 0; });
 
         // Update counts
         document.getElementById('deadCount').textContent = deadAccounts.length;
-        document.getElementById('peopleCount').textContent = engagedAccounts.length;
+        document.getElementById('peopleCount').textContent = engagedPeople.length;
         document.getElementById('totalDeadCount').textContent = deadAccounts.length;
-        document.getElementById('totalPeopleCount').textContent = engagedAccounts.length;
+        document.getElementById('totalPeopleCount').textContent = engagedPeople.length;
         document.getElementById('topTweetsCount2').textContent = Math.min(allTweets.length, 50);
         document.getElementById('mentionsCount2').textContent = allMentions.length;
 
         // Switch to results page
         document.getElementById('page1').classList.remove('active');
         document.getElementById('page2').classList.add('active');
+        window.scrollTo(0, 0);
         
         showResultsOrListSetup();
 
@@ -2206,6 +2335,139 @@
     
     // Engagement filter handler
     document.getElementById('minEngagementFilter').addEventListener('change', renderPeopleList);
+    
+    // Lookback filter handler - recalculates all engagement data
+    document.getElementById('lookbackFilter').addEventListener('change', function() {
+      recalculateEngagementWithLookback();
+    });
+    
+    // Recalculate engagement based on lookback period
+    function recalculateEngagementWithLookback() {
+      var lookbackYears = document.getElementById('lookbackFilter').value;
+      var cutoffDate = null;
+      
+      if (lookbackYears !== 'all') {
+        var cutoff = new Date();
+        cutoff.setFullYear(cutoff.getFullYear() - parseInt(lookbackYears));
+        cutoffDate = cutoff.toISOString().slice(0, 7); // YYYY-MM format
+      }
+      
+      console.log('Recalculating with lookback:', lookbackYears, 'cutoff:', cutoffDate);
+      
+      var allLikeDates = window.allLikeDates || {};
+      var allReplyDates = window.allReplyDates || {};
+      
+      // Recalculate likeCounts with cutoff
+      var likeCounts = {};
+      var lastLikeDates = {};
+      Object.keys(allLikeDates).forEach(function(handle) {
+        var dates = allLikeDates[handle].filter(function(d) {
+          return !cutoffDate || d >= cutoffDate;
+        });
+        if (dates.length > 0) {
+          likeCounts[handle] = dates.length;
+          lastLikeDates[handle] = dates.sort().reverse()[0];
+        }
+      });
+      
+      // Recalculate replyCounts with cutoff
+      var replyCounts = {};
+      var lastReplyDates = {};
+      Object.keys(allReplyDates).forEach(function(handle) {
+        var dates = allReplyDates[handle].filter(function(d) {
+          return !cutoffDate || d >= cutoffDate;
+        });
+        if (dates.length > 0) {
+          replyCounts[handle] = dates.length;
+          lastReplyDates[handle] = dates.sort().reverse()[0];
+        }
+      });
+      
+      // Update global counts
+      window.likeCounts = likeCounts;
+      window.replyCounts = replyCounts;
+      window.lastLikeDates = lastLikeDates;
+      window.lastReplyDates = lastReplyDates;
+      
+      // Update allAccounts engagement data
+      allAccounts.forEach(function(a) {
+        var handle = a.handle?.toLowerCase();
+        if (handle) {
+          a.likes = likeCounts[handle] || 0;
+          a.replies = replyCounts[handle] || 0;
+          a.engagements = a.likes + a.replies;
+          var lastLike = lastLikeDates[handle];
+          var lastReply = lastReplyDates[handle];
+          if (lastLike && lastReply) a.lastEngaged = lastLike > lastReply ? lastLike : lastReply;
+          else a.lastEngaged = lastLike || lastReply || null;
+        }
+      });
+      
+      // Rebuild engagedPeople from scratch
+      var seenHandles = new Set();
+      var engagedPeople = [];
+      
+      Object.keys(replyCounts).forEach(function(handle) {
+        if (!seenHandles.has(handle)) {
+          seenHandles.add(handle);
+          var likes = likeCounts[handle] || 0;
+          var replies = replyCounts[handle] || 0;
+          var lastLike = lastLikeDates[handle];
+          var lastReply = lastReplyDates[handle];
+          var lastEngaged = null;
+          if (lastLike && lastReply) lastEngaged = lastLike > lastReply ? lastLike : lastReply;
+          else lastEngaged = lastLike || lastReply;
+          
+          engagedPeople.push({
+            handle: handle,
+            name: handle,
+            profileUrl: 'https://x.com/' + handle,
+            likes: likes,
+            replies: replies,
+            engagements: likes + replies,
+            lastEngaged: lastEngaged
+          });
+        }
+      });
+      
+      Object.keys(likeCounts).forEach(function(handle) {
+        if (!seenHandles.has(handle)) {
+          seenHandles.add(handle);
+          var likes = likeCounts[handle] || 0;
+          var replies = replyCounts[handle] || 0;
+          var lastLike = lastLikeDates[handle];
+          var lastReply = lastReplyDates[handle];
+          var lastEngaged = null;
+          if (lastLike && lastReply) lastEngaged = lastLike > lastReply ? lastLike : lastReply;
+          else lastEngaged = lastLike || lastReply;
+          
+          engagedPeople.push({
+            handle: handle,
+            name: handle,
+            profileUrl: 'https://x.com/' + handle,
+            likes: likes,
+            replies: replies,
+            engagements: likes + replies,
+            lastEngaged: lastEngaged
+          });
+        }
+      });
+      
+      engagedPeople.sort(function(a, b) { return b.engagements - a.engagements; });
+      window.engagedPeople = engagedPeople;
+      
+      // Update counts
+      var deadAccounts = allAccounts.filter(function(a) { return a.engagements === 0; });
+      document.getElementById('deadCount').textContent = deadAccounts.length;
+      document.getElementById('peopleCount').textContent = engagedPeople.length;
+      document.getElementById('totalDeadCount').textContent = deadAccounts.length;
+      
+      // Re-render lists
+      renderDeadList();
+      renderPeopleList();
+      
+      console.log('Recalculated: ', engagedPeople.length, 'engaged,', deadAccounts.length, 'dead');
+    }
 
     // Helper function for clipboard with fallback
     function copyToClipboard(text) {
@@ -2292,17 +2554,20 @@
       });
     });
 
-    // Select all people
+    // Select all people (checkbox)
     document.getElementById('selectAllPeople').addEventListener('change', function() {
       var checked = this.checked;
       document.querySelectorAll('.done-checkbox-people').forEach(function(cb) {
         cb.checked = checked;
       });
     });
-
-    // Extension CTA button
-    document.getElementById('getExtensionBtn').addEventListener('click', function() {
-      window.open('extension.html', '_blank');
+    
+    // Select all people (button)
+    document.getElementById('selectAllPeopleBtn').addEventListener('click', function() {
+      document.getElementById('selectAllPeople').checked = true;
+      document.querySelectorAll('.done-checkbox-people').forEach(function(cb) {
+        cb.checked = true;
+      });
     });
 
     // Copy tip address
@@ -2368,23 +2633,11 @@
       }
     }
 
-    // Check if we need to show resolve prompt (has unresolved user IDs)
+    // Check if we need to show resolve prompt - DISABLED since Your People uses handles from engagement data
     function checkShowResolvePrompt() {
-      var unresolvedCount = allAccounts.filter(function(a) {
-        return a.userId && !resolveState.cache[a.userId];
-      }).length;
-      
+      // Don't show resolve prompt - we have handles from likes/tweets
       var prompt = document.getElementById('resolvePrompt');
-      if (unresolvedCount > 0) {
-        prompt.style.display = 'block';
-        document.getElementById('unresolvedCountPrompt').textContent = unresolvedCount;
-        // Estimate time: 2 sec per account
-        var mins = Math.ceil(unresolvedCount * 2 / 60);
-        var timeStr = mins < 60 ? mins + ' mins' : Math.round(mins / 60 * 10) / 10 + ' hours';
-        document.getElementById('estimatedTimePrompt').textContent = timeStr;
-      } else {
-        prompt.style.display = 'none';
-      }
+      prompt.style.display = 'none';
     }
 
     // Apply cached handles to accounts
